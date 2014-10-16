@@ -1,0 +1,2 @@
+24/07/2014 01:11:20 PM	TimelapseDao Insert(Timelapse timelapse) Conversion failed when converting the nvarchar value '24b471bbc87a62c562a4e72a9464fc1b' to data type int.
+

@@ -1,0 +1,1 @@
+START "shutdown" "C:\Timelapse\Shutdown\shutdown.exe" all

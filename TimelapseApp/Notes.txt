@@ -1,0 +1,39 @@
+﻿Introduction
+------------
+Timelapser is a console application that will run on every capturing server by 24/7 to create (paused & recording) 
+timelapses which are already requested/queued by users of http://timelapse.camba.tv. ApplicationMonitor.exe on 
+that server will ensure that singleton instance of Timelapser is always running there. Application will create 
+new instance of TimelapseCreator.exe for every new request in Timelapses table in SQL DB (similar to Cam. Recorder).
+After successfully creating a Timelapse its TimelapseCreator.exe will update related Timelapse's status in SQL DB.
+
+In Future
+---------
+- we may use Timelapser to create custom timelapses based on Admin requests (may be via a simple window GUI app.)
+
+TimelapseCreator.exe will
+-------------------------
+- be a console application running for single Timelapse generation
+- have its console window title as Timelapse ID: Timelapse Title
+- generate timelapse video in multiple formats (e.g. mp4, webm, ogv, etc.)
+- kill itself after creating paused timelapse and will keep on updating a recording timelapse
+- log success/failure details in its own logs.txt file
+
+RestSharp
+---------
+var client = new RestClient("http://webapi.camba.tv/");
+
+var request = new RestRequest("v1/auth/token", Method.POST);
+request.AddParameter("user_name", "azhar.malik@mhlabs.net");
+request.AddParameter("user_password", "4240");
+//request.AddHeader("header", "value");
+
+var response = client.Execute(request);
+// or
+client.DownloadData(request).SaveAs(path);
+
+
+Specs:
+https://docs.google.com/a/mhlabs.net/document/d/1cvfEj10_MuyNGp40QyU0f5bHnsBRP83t4gxBdQlHP20/edit#
+
+Design:
+https://docs.google.com/a/mhlabs.net/document/d/1B3pB0vp256ZplRe-AsC5SIbkKrrFFlDMaTK-VYJ5-5k/edit

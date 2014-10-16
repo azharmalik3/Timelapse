@@ -1,0 +1,39 @@
+.httpMethod {
+    width: 20%;
+}
+
+.uriPath {
+    width: 70%;
+}
+
+.sampleArea {
+    width: 100%;
+    border:solid 1px #999999;
+}
+
+#testClientButton {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    width: 150px;
+    font-size: x-large;
+}
+
+select {
+    margin-top: 10px;
+}
+
+.panel {
+    max-height: 120px;
+    overflow: auto;
+}
+
+    .panel input {
+        width: 150px;
+    }
+
+.uriParameterLabel {
+    width: 100px;
+    float: left;
+    border: none;
+}

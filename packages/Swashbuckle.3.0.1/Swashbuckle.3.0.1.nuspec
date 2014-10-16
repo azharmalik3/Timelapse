@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+  <metadata>
+    <id>Swashbuckle</id>
+    <version>3.0.1</version>
+    <title>Swashbuckle</title>
+    <authors>Richard Morris,  GettyImages</authors>
+    <owners>Richard Morris,  GettyImages</owners>
+    <licenseUrl>http://opensource.org/licenses/BSD-3-Clause</licenseUrl>
+    <projectUrl>https://github.com/domaindrivendev/Swashbuckle</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Seamlessly adds a Swagger to WebApi projects! Uses a combination of ApiExplorer and Swagger/Swagger-UI to provide a rich discovery and documentation experience for consumers</description>
+    <copyright>Copyright 2013</copyright>
+    <tags>Swagger WebApi Documentation Discovery Help</tags>
+    <dependencies>
+      <dependency id="Microsoft.AspNet.Mvc" version="4.0.20710.0" />
+      <dependency id="Microsoft.AspNet.WebApi" version="4.0.20710.0" />
+    </dependencies>
+  </metadata>
+</package>

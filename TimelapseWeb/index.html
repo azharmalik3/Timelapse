@@ -1,0 +1,191 @@
+﻿<!DOCTYPE html>
+<!--[if IE 8]> <html lang="en" class="ie8"> <![endif]-->
+<!--[if IE 9]> <html lang="en" class="ie9"> <![endif]-->
+<!--[if !IE]><!--> <html lang="en" class="sessions new  mz-js mz-no-touch mz-history mz-rgba mz-backgroundsize mz-opacity mz-cssanimations mz-csstransforms mz-csstransforms3d mz-csstransitions mz-localstorage mz-applicationcache mz-svg mz-fullscreen loaded ua-chrome" data-account="free" style="">
+ <!--<![endif]-->
+<!-- BEGIN HEAD -->
+<head>
+    <meta charset="utf-8" />
+    <title>Timelapse maker for IP Cameras</title>
+    <meta content="" name="description" />
+    <meta content="" name="author" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <!-- BEGIN GLOBAL MANDATORY STYLES -->
+    <link href="assets/plugins/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css"/>
+    <link href="assets/plugins/bootstrap/css/bootstrap-responsive.min.css" rel="stylesheet" type="text/css"/>
+    <link href="assets/css/reset.css" rel="stylesheet" type="text/css"/>
+    <link href="assets/css/custom-stylesheet.css" rel="stylesheet" type="text/css" />
+    <link href="assets/css/style-metro.css" rel="stylesheet" type="text/css"/>
+    <link href="assets/css/style.css" rel="stylesheet" type="text/css"/>
+    <link href="assets/plugins/fancybox/source/jquery.fancybox.css" rel="stylesheet" />
+    <link href="assets/plugins/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css"/>
+    
+    <link rel="stylesheet" type="text/css" href="assets/plugins/bootstrap-datepicker/css/datepicker.css" />
+    <link rel="stylesheet" type="text/css" href="assets/plugins/bootstrap-timepicker/compiled/timepicker.css" />
+
+    <link href="assets/plugins/bxslider/jquery.bxslider.css" rel="stylesheet" />
+    <link href="assets/css/style-responsive.css" rel="stylesheet" type="text/css"/>
+    <link rel="stylesheet" type="text/css" href="assets/plugins/jquery-ui/jquery-ui-1.10.1.custom.min.css" />
+    <link href="assets/css/pages/portfolio.css" rel="stylesheet" type="text/css" /> 
+    <link href="assets/css/jquery.alerts.css" rel="stylesheet" type="text/css" media="screen" />
+    <link href="assets/css/jquery.snippet.min.css" rel="stylesheet" type="text/css" />
+    <!--<link rel="stylesheet" href="assets/css/jquery.ui.timepicker.css?v=0.3.3" type="text/css" />-->
+    <link rel="stylesheet" type="text/css" href="assets/plugins/select2/select2_metro.css" />
+
+    <link href="download/facebox/facebox.css" media="screen" rel="stylesheet" type="text/css" />
+    <link href="download/downloadr/downloadr.css" media="screen" rel="stylesheet" type="text/css" />
+
+    <link href="assets/css/fonts.css" media="all" rel="stylesheet" type="text/css">
+    <link href="assets/css/login.css" media="all" rel="stylesheet" type="text/css">
+    <!-- END GLOBAL MANDATORY STYLES -->
+
+    <link rel="shortcut icon" href="favicon.ico" />
+</head>
+<!-- END HEAD -->
+<!-- BEGIN BODY -->
+                   <body class="inner-body">
+
+                       <!-- BEGIN HEADER -->
+                       <div class="front-header">
+                           <div class="container">
+                               <div class="navbar">
+                                   <div class="navbar-inner">
+
+                                       <!-- BEGIN LOGO (you can use logo image instead of text)-->
+                                       
+                                       <img class="logo-t showlist iconcursor" src="assets/img/logo-t.png" id="logoimg" alt="">
+                                       
+                                       <!-- END LOGO -->
+                                       <!-- BEGIN RESPONSIVE MENU TOGGLER -->
+                                       <!--<a class="responsivenav btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                                           <span class="icon-bar"></span>
+                                           <span class="icon-bar"></span>
+                                           <span class="icon-bar"></span>
+                                       </a>-->
+                                       <!-- END RESPONSIVE MENU TOGGLER -->
+                                       <!-- BEGIN TOP NAVIGATION MENU -->
+                                       <div class="nav-collapse collapse">
+
+                                           <ul class="nav" id="topnavigation">
+                                               <li id="liUsername" class="hide"><div class="user-name showlist iconcursor" id="displayUsername">azhar.malik@mhlabs.net</div></li>
+                                               <li id="lnkSignout" class="hide"><a id="lnkLogout" href="javascript:;"><img src="assets/img/sign-out.png"/></a></li>
+                                               <!--<li id="liNew" style="background-color: #e6e6e6;" class="hide"><a id="lnNewTimelapse1" href="javascript:;"><i class="icon-plus"></i> New</a></li>-->
+                                           </ul>
+                                       </div>
+                                       <!-- BEGIN TOP NAVIGATION MENU -->
+                                   </div>
+                               </div>
+                           </div>
+                       </div>
+                       <!-- END HEADER -->
+                       <!-- BEGIN REVOLUTION SLIDER -->
+                       <div class="fullwidthbanner-container">
+                           <div id="divMainContainer" class="fullwidthabnner padding-top40">
+                               <input type="hidden" id="user_local_Ip" />
+                               <div id="btnNewTimelapse" class="container hide">
+                                   <div class="row-fluid">
+                                       <div class="span11 margin-left0">
+                                           <a id="lnNewTimelapse" href="javascript:;"><img src="assets/img/new-timelapse.png" /></a>
+                                           <a id="lnNewTimelapseCol" href="javascript:;" class="hide"><img src="assets/img/new-timelapse-col.png" /></a>
+                                           <a id="lnNewCamera" class="hide" href="javascript:;"><img src="assets/img/new-camera.png" /></a>
+                                           <a id="lnNewCameraCol" href="javascript:;" class="hide"><img src="assets/img/new-camera-col.png" /></a>
+                                       </div>
+                                       <div class="span1 text-right margin-left0 margin-top-10">
+                                           <a id="lnExpandTimelapses" href="javascript:;"><img src="assets/img/expand-all.png" alt="Expand All Timelapses" title="Expand All Timelapses" /></a>
+                                           <a id="lnCollapseTimelapses" href="javascript:;" class="hide"><img src="assets/img/collapse-all.png" alt="Collapse All Timelapses" title="Collapse All Timelapses" /></a>
+                                       </div>
+                                   </div>
+                               </div>
+                               <br />
+                               <!-- BEGIN CONTAINER -->
+                               <div class="container">
+                                   <!-- BEGIN SERVICE BOX -->
+                                   <!-- Start New Timelapse block -->
+                                   <div class="hide header-bg" id="newTimelapse"> </div>
+
+                                   <!-- Start New Timelapse block -->
+                                   <div class="default-timelapse"></div>
+
+                                   <div class="clearfix"></div>
+                                   <!-- BEGIN CAROUSEL -->
+
+                                   <div class="timelapseContainer hide">
+                                       <div id="divTimelapses"></div>
+                                   </div>
+                                   <!-- END CAROUSEL -->
+                                   <div class="row-fluid no-timelapse" id="divLoadingTimelapse">
+                                       <img src="assets/img/loader3.gif" alt="Loading..." />
+                                   </div>
+                               </div>
+                               <!-- END CONTAINER -->
+                           </div>
+                       </div>
+
+                       <!-- BEGIN COPYRIGHT -->
+                       <div class="front-copyright">
+                           <div class="container">
+                               <div class="row-fluid">
+                                   <div class="span8">
+                                       <p>
+                                           <span class="margin-right-10 footer-label">AsTimeGoes.by &copy; 2014</span>
+                                           <!--<a href="http://timelapse.camba.tv/api" target="_blank">Timelapse API</a>-->
+                                       </p>
+                                   </div>
+                                   <div class="span4">
+                                       <p class="text-right">
+                                           <span class="footer-label">#astimegoesby</span>
+                                       </p>
+                                   </div>
+                               </div>
+                           </div>
+                       </div>
+                       <!-- END COPYRIGHT -->
+                       <!-- BEGIN JAVASCRIPTS(Load javascripts at bottom, this will reduce page load time) -->
+                       <!-- BEGIN CORE PLUGINS -->
+                       <script src="assets/plugins/jquery-1.10.1.min.js" type="text/javascript"></script>
+                       <script src="assets/plugins/jquery-migrate-1.2.1.min.js" type="text/javascript"></script>
+                       <!-- IMPORTANT! Load jquery-ui-1.10.1.custom.min.js before bootstrap.min.js to fix bootstrap tooltip conflict with jquery ui tooltip -->
+                       <script src="assets/plugins/jquery-ui/jquery-ui-1.10.1.custom.min.js" type="text/javascript"></script>
+                       <script src="assets/plugins/bootstrap/js/bootstrap.min.js" type="text/javascript"></script>
+                       <script type="text/javascript" src="assets/plugins/back-to-top.js"></script>
+
+                       <script type="text/javascript" src="assets/plugins/fancybox/source/jquery.fancybox.pack.js"></script>
+                       <script type="text/javascript" src="assets/plugins/fancybox/source/helpers/jquery.fancybox-media.js?v=1.0.5"></script>
+                       <script type="text/javascript" src="assets/plugins/hover-dropdown.js"></script>
+
+                       <script src="download/facebox/facebox.js" type="text/javascript"></script>
+                       <script src="download/downloadr/jqbrowser.js" type="text/javascript"></script>
+                       <script src="download/downloadr/downloadr.js" type="text/javascript"></script>
+
+                       <script type="text/javascript" src="assets/plugins/bootstrap-datepicker/js/bootstrap-datepicker.js"></script>
+                       <script type="text/javascript" src="assets/plugins/bootstrap-timepicker/js/bootstrap-timepicker.js"></script>
+
+                       <script src="assets/plugins/jquery-slimscroll/jquery.slimscroll.min.js" type="text/javascript"></script>
+                       <script type="text/javascript" src="assets/scripts/jquery.snippet.min.js"></script>
+                       <script type="text/javascript" src="assets/plugins/jquery.cookie.min.js"></script>
+                       
+                       <script type="text/javascript" src="assets/plugins/select2/select2.min.js"></script>
+                       
+                       <!--[if lt IE 9]>
+    <script src="assets/plugins/respond.min.js"></script>
+    <![endif]-->
+                       <!-- END CORE PLUGINS -->
+                       <script src="assets/scripts/jquery.alerts.js" type="text/javascript"></script>
+                       <script src="assets/scripts/commonFunctions.js"></script>
+                       <script src="http://cdn.evercam.io/js/v1/evercam.js"></script>
+                       <script src="assets/scripts/app.js"></script>
+                       <script src="assets/scripts/index.js"></script>
+                       <script type="text/javascript">
+                           jQuery(document).ready(function () {
+                               App.init();
+                               //App.initBxSlider();
+                               Index.init();
+
+                           });
+                       </script>
+                       <!-- END JAVASCRIPTS -->
+                   </body>
+<!-- END BODY -->
+</html>
