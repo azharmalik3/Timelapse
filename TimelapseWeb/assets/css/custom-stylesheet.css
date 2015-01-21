@@ -269,6 +269,17 @@ margin-bottom:35px;
     width:50%;
 }
 
+.tab-a2{
+    font-family:'brandon_grotesqueRg';
+    text-decoration:none;
+    font-weight:normal;
+    color:#2c3e50;
+}
+.tab-a2:link{
+    text-decoration:none;
+    color:#2c3e50;
+}
+
 .tab-a{
     font-family:'brandon_grotesqueRg';
     text-decoration:none;
@@ -309,6 +320,7 @@ margin-bottom:35px;
     .footer-label{font-size:20px;color:#ffffff;}
     .tbl-tab{width:100%;font-size:14px;color:#2c3e50;}
     .timelapse-label{ font-family:'brandon_grotesquebold'; font-size:18px; color:#2c3e50; }
+    .timelapse-camera-name{font-family:'brandon_grotesqueRg'; font-size:13px; color:#2c3e50; }
     .timelapse-label-status{ font-size:18px; color:#2c3e50; }
     .commonLinks{
         text-decoration:none;
@@ -362,6 +374,7 @@ margin-bottom:35px;
         
     }
     .tbl-hd2{width: 24%; text-align: left; padding-bottom: 5px;}
+    .tbl-hd3{width: 24%; text-align: right; padding-bottom: 5px;}
     .footer-heading{font-size:30px;text-align:center;color:#666666;}
     .footer-paragraph{font-size:20px;text-align:center;color:#666666;padding-bottom:30px;line-height:30px;}
     .timelapse-paused{background:url('../img/paused-lbl.png') top right no-repeat;height:20px;}

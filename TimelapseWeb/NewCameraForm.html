@@ -1,0 +1,79 @@
+﻿
+<div class="main customize-nav" role="main">
+    <div class="column medium">
+        <div class="row-fluid">
+            <br />
+            <form class="form-horizontal">
+                <div class="control-group">
+                    <label class="control-label">Unique ID</label>
+                    <div class="controls">
+                        <input type="text" id="txtCameraUniqueId" class="span8 m-wrap white" placeholder="Camera Unique ID">
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">Name</label>
+                    <div class="controls">
+                        <input type="text" id="txtCameraName" class="span8 m-wrap white" placeholder="Camera Name">
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">Camera Host</label>
+                    <div class="controls">
+                        <input type="text" id="txtCameraHost" class="span8 m-wrap white" placeholder="Camera Host">
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">Camera Ports</label>
+                    <div class="controls">
+                        <input type="text" id="txtCameraHttpPort" class="span4 m-wrap white" placeholder="Camera HTTP Port">
+                        <input type="text" id="txtCameraRtspPort" class="span4 m-wrap white" placeholder="Camera RTSP Port">
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">Camera Privacy</label>
+                    <div class="controls">
+                        <div class="row-fluid padding-top3">
+                            <label class="radio span2">
+                                <input id="rdPublicCamera" name="CameraPrivacy" type="radio" />&nbsp;Public
+                            </label>
+                            <label class="radio span3">
+                                <input id="rdPrivateCamera" name="CameraPrivacy" type="radio" checked />&nbsp;Private
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">Snapshot Url</label>
+                    <div class="controls">
+                        <input type="text" id="txtCameraUrl" class="span8 m-wrap white" placeholder="Camera Snapshot Url">
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">Camera Credentials</label>
+                    <div class="controls">
+                        <input type="text" id="txtCameraUsername" class="span4 m-wrap white" placeholder="Camera Username">
+                        <input type="text" id="txtCameraPassword" class="span4 m-wrap white" placeholder="Camera Password">
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label"></label>
+                    <div class="controls">
+                        <button type="button" data-val="0" class="btn cameraformButtonOk"><i class="icon-ok"></i> Save</button>
+                        <button data-val="0" type="button" class="btn cameraformButtonCancel">Cancel</button>
+                        <input type="hidden" id="txtCameraCode0" />
+                    </div>
+                </div>
+                <div class="control-group">
+                    <div class="controls">
+                        <div id="divAlert0" class="alert alert-error hide">
+                            <button class="close" data-dismiss="alert"></button>
+                            <span>Enter any email and password.</span>
+                        </div>
+                    </div>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>

@@ -27,22 +27,39 @@
                     $("#videoContainer").append(html);
                 },
                 error: function (xhrc, ajaxOptionsc, thrownErrorc) {
-                    var img = new Image();
-                    img.onerror = function (evt) {
-                        var html = '<video data-setup="{}" poster="assets/img/timelapse.jpg" preload="none" controls="" class="video-js vjs-default-skin video-bg-width" id="vde4b3u05e9y">';
-                        html += '<source type="video/mp4" src="' + mp4 + '"></source>';
-                        html += '</video>';
-                        $("#videoContainer").append(html);
-                    };
-                    img.onload = function (evt) {
-                        var html = '<video data-setup="{}" poster="' + jpg + '" preload="none" controls="" class="video-js vjs-default-skin video-bg-width" id="vde4b3u05e9y">';
-                        html += '<source type="video/mp4" src="' + mp4 + '"></source>';
-                        html += '</video>';
-                        $("#videoContainer").append(html);
-                    };
-                    img.src = jpg;                    
+                    var html = '<video data-setup="{}" poster="assets/img/timelapse.jpg" preload="none" controls="" class="video-js vjs-default-skin video-bg-width" id="vde4b3u05e9y">';
+                    html += '<source type="video/mp4" src="' + mp4 + '"></source>';
+                    html += '</video>';
+                    $("#videoContainer").append(html);
                 }
             });
+
+            /*var img = new Image();
+            img.onerror = function (evt) {
+                jpg = "https://api.evercam.io/v1/cameras/" + cameraId + "/snapshot.jpg.json?api_id=c298268b&api_key=600736690c93646b89e3230480978629";
+                var img2 = new Image();
+                img2.onerror = function (e) {
+                    var html = '<video data-setup="{}" poster="assets/img/timelapse.jpg" preload="none" controls="" class="video-js vjs-default-skin video-bg-width" id="vde4b3u05e9y">';
+                    html += '<source type="video/mp4" src="' + mp4 + '"></source>';
+                    html += '</video>';
+                    $("#videoContainer").append(html);
+                };
+                img2.onload = function (e) {
+                    var html = '<video data-setup="{}" poster="' + jpg + '" preload="none" controls="" class="video-js vjs-default-skin video-bg-width" id="vde4b3u05e9y">';
+                    html += '<source type="video/mp4" src="' + mp4 + '"></source>';
+                    html += '</video>';
+                    $("#videoContainer").append(html);
+                }
+                img2.src = jpg;
+            };
+            img.onload = function (evt) {
+                var html = '<video data-setup="{}" poster="' + jpg + '" preload="none" controls="" class="video-js vjs-default-skin video-bg-width" id="vde4b3u05e9y">';
+                html += '<source type="video/mp4" src="' + mp4 + '"></source>';
+                html += '</video>';
+                $("#videoContainer").append(html);
+            };
+            img.src = jpg;*/
+            
             
         });
         var getParameterByName = function (name) {
@@ -61,7 +78,10 @@
 </head>
 <body>
     <div id="videoContainer">
-        
+        <!--<video data-setup="{}" poster="http://144.76.84.113/timelapses/3730/22/22.jpg" preload="none" controls="" class="video-js vjs-default-skin video-bg-width" id="vde4b3u05e9y">
+            <source type="video/mp4" src="http://144.76.84.113/timelapses/3730/22/e4b3u05e9y.mp4"></source>
+            <source type="video/webm" src="http://144.76.84.113/timelapses/3730/22/e4b3u05e9y.mp4"></source>
+        </video>-->
     </div>
 </body>
 </html>

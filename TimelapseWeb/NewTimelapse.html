@@ -1,0 +1,252 @@
+﻿
+<div class="main customize-nav" role="main">
+    <div class="column medium">
+        <br />
+        <div class="row-fluid">
+            <div class="span8">
+                <form id="fileupload" action="//jquery-file-upload.appspot.com/" method="POST" enctype="multipart/form-data" class="form-horizontal">
+                    <div class="control-group">
+                        <label class="form-control-label">Camera</label>
+                        <div class="form-control">
+                            <select id="ddlCameras0" class="span11 m-wrap"><option value=""></option></select>
+                            <img src="assets/img/ajax-loader.gif" id="imgCamLoader" />
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="form-control-label">Title</label>
+                        <div class="form-control">
+                            <input type="text" id="txtTitle0" class="span11 m-wrap white" placeholder="Timelapse Title">
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="form-control-label">Interval</label>
+                        <div class="form-control">
+                            <select id="ddlIntervals0" class="span11 m-wrap">
+                                <option value="0">Select Interval</option>
+                                <option value="1">1 Frame Every 1 min</option>
+                                <option value="5">1 Frame Every 5 min</option>
+                                <option value="15">1 Frame Every 15 min</option>
+                                <option value="30">1 Frame Every 30 min</option>
+                                <option value="60">1 Frame Every 1 hour</option>
+                                <option value="360">1 Frame Every 6 hours</option>
+                                <option value="720">1 Frame Every 12 hours</option>
+                                <option value="1440">1 Frame Every 24 hours</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="form-control-label">Frames/sec.</label>
+                        <div class="form-control">
+                            <select id="ddlFrameRate0" class="span11 m-wrap">
+                                <option value="1" selected="selected">1 fps</option>
+                                <option value="2">2 fps</option>
+                                <option value="3">3 fps</option>
+                                <option value="4">4 fps</option>
+                                <option value="5">5 fps</option>
+                                <option value="6">6 fps</option>
+                                <option value="7">7 fps</option>
+                                <option value="8">8 fps</option>
+                                <option value="9">9 fps</option>
+                                <option value="10">10 fps</option>
+                                <option value="11">11 fps</option>
+                                <option value="12">12 fps</option>
+                                <option value="13">13 fps</option>
+                                <option value="14">14 fps</option>
+                                <option value="15">15 fps</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="form-control-label">Date Range</label>
+                        <div class="form-control">
+                            <div class="row-fluid padding-top3">
+                                <label class="radio span4">
+                                    <input id="chkDateRangeAlways0" name="DateRange" type="radio" checked data-val="0" />&nbsp;Always
+                                </label>
+                                <label class="radio span3">
+                                    <input id="chkDateRange0" name="DateRange" type="radio" data-val="0" />&nbsp;Range
+                                </label>
+                            </div>
+                            <div id="divDateRange0" class="row-fluid- hide">
+                                <input type="text" id="txtFromDateRange0" class="span1 small m-wrap white daterange" placeholder="From Date" readonly>&nbsp;
+                                <input type="text" id="txtToDateRange0" class="span1 small m-wrap white daterange" placeholder="To Date" readonly>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label class="form-control-label">Time Range</label>
+                        <div class="form-control">
+                            <div class="row-fluid padding-top3">
+                                <label class="radio span4">
+                                    <input id="chkTimeRangeAlways0" name="TimeRange" type="radio" checked data-val="0" />&nbsp;Always
+                                </label>
+                                <label class="radio span3">
+                                    <input id="chkTimeRange0" name="TimeRange" type="radio" data-val="0" />&nbsp;Range
+                                </label>
+                            </div>
+                            <div id="divTimeRange0" class="row-fluid- hide">
+                                <input type="text" id="txtFromTimeRange0" class="span1 small m-wrap white timerange" placeholder="From Time" readonly value="00:00">&nbsp;
+                                <input type="text" id="txtToTimeRange0" class="span1 small m-wrap white timerange" placeholder="To Time" readonly value="23:59">
+                            </div>
+                        </div>
+                    </div>
+                    <div id="divRecording" class="control-group hide">
+                        <label class="form-control-label">Recoording</label>
+                        <div class="form-control">
+                            <div class="row-fluid padding-top3">
+                                <label class="radio span2">
+                                    <input id="chkRecordingTimelapse0" name="recording" type="radio" value="a" checked />&nbsp;Active
+                                </label>
+                                <label class="radio span3">
+                                    <input id="chkPausedTimelapse0" name="recording" type="radio" value="p" />&nbsp;Paused
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label class="form-control-label">Watermark Position</label>
+                        <div class="form-control">
+                            <select id="ddlWatermarkPos0" class="span11 m-wrap">
+                                <option value="0" selected="selected">Top Left</option>
+                                <option value="1">Top Right</option>
+                                <option value="2">Bottom Left</option>
+                                <option value="3">Bottom Right</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label class="form-control-label">Watermark Logo</label>
+                        <div class="form-control">
+                            <div id="divChooseFile" class="row-fluid-">
+                                <!-- Redirect browsers with JavaScript disabled to the origin page -->
+                                <noscript><input type="hidden" name="redirect" value="http://blueimp.github.com/jQuery-File-Upload/"></noscript>
+                                <!-- The fileupload-buttonbar contains buttons to add/delete files and start/cancel the upload -->
+                                <div class="row-fluid fileupload-buttonbar">
+                                    <div class="span7">
+                                        <!-- The fileinput-button span is used to style the file input field as button -->
+                                        <span class="btn grey fileinput-button">
+                                            <i class="icon-plus icon-white"></i>
+                                            <span>Add file...</span>
+                                            <input id="fuChoose" type="file" name="files[]">
+                                        </span>
+                                        <input type="checkbox" class="toggle fileupload-toggle-checkbox hide">
+                                    </div>
+                                    <div class="span4 text-right">
+                                        <img id="imgWatermarkLogo" src="" class="hide" style="height:35px;">
+                                    </div>
+                                </div>
+                                <!-- The table listing the files available for upload/download -->
+                                <table role="presentation" class="table table-striped">
+                                    <tbody class="files" data-toggle="modal-gallery" data-target="#modal-gallery"></tbody>
+                                </table>
+                            </div>
+                            <div class="row-fluid hide">
+                                <div class="span12">
+                                    <script id="template-upload" type="text/x-tmpl">
+                                        {% for (var i=0, file; file=o.files[i]; i++) { %}
+                                        <tr class="template-upload fade">
+                                            <td class="preview"><span class="fade"></span></td>
+                                            <td class="name"><span>{%=file.name%}</span></td>
+                                            <td class="size"><span>{%=o.formatFileSize(file.size)%}</span></td>
+                                            {% if (file.error) { %}
+                                            <td class="error" colspan="2"><span class="label label-important">Error</span> {%=file.error%}</td>
+                                            {% } else if (o.files.valid && !i) { %}
+                                            <td class="hide">
+                                                <div class="progress progress-success progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="bar" style="width:0%;"></div></div>
+                                            </td>
+                                            <td class="start hide">
+                                                {% if (!o.options.autoUpload) { %}
+                                                <button class="btn">
+                                                    <i class="icon-upload icon-white"></i>
+                                                    <span>Start</span>
+                                                </button>
+                                                {% } %}
+                                            </td>
+                                            {% } else { %}
+                                            <td colspan="2"></td>
+                                            {% } %}
+                                            <td class="cancel">
+                                                {% if (!i) { %}
+                                                <button class="btn red">
+                                                    <i class="icon-ban-circle icon-white"></i>
+                                                    <span>Cancel</span>
+                                                </button>
+                                                {% } %}
+                                            </td>
+                                        </tr>
+                                        {% } %}
+                                    </script>
+                                    <!-- The template to display files available for download -->
+                                    <script id="template-download" type="text/x-tmpl">
+                                        {% for (var i=0, file; file=o.files[i]; i++) { %}
+                                        <tr class="template-download fade">
+                                            {% if (file.error) { %}
+                                            <td></td>
+                                            <td class="name"><span>{%=file.name%}</span></td>
+                                            <td class="size"><span>{%=o.formatFileSize(file.size)%}</span></td>
+                                            <td class="error" colspan="2"><span class="label label-important">Error</span> {%=file.error%}</td>
+                                            {% } else { %}
+                                            <td class="preview">
+                                                {% if (file.thumbnail_url) { %}
+                                                <a class="fancybox-button" data-rel="fancybox-button" href="{%=file.url%}" title="{%=file.name%}">
+                                                    <img src="{%=file.thumbnail_url%}">
+                                                </a>
+                                                {% } %}
+                                            </td>
+                                            <td class="name">
+                                                <a href="{%=file.url%}" title="{%=file.name%}" data-gallery="{%=file.thumbnail_url&&'gallery'%}" download="{%=file.name%}">{%=file.name%}</a>
+                                            </td>
+                                            <td class="size"><span>{%=o.formatFileSize(file.size)%}</span></td>
+                                            <td colspan="2"></td>
+                                            {% } %}
+                                            <td class="delete hide">
+                                                <button class="btn red" data-type="{%=file.delete_type%}" data-url="{%=file.delete_url%}" {% if (file.delete_with_credentials) { %} data-xhr-fields='{"withCredentials":true}' {% } %}>
+                                                    <i class="icon-trash icon-white"></i>
+                                                    <span>Delete</span>
+                                                </button>
+                                                <input type="checkbox" class="fileupload-checkbox hide" name="delete" value="1">
+                                            </td>
+                                        </tr>
+                                        {% } %}
+                                    </script>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label class="form-control-label"></label>
+                        <div class="form-control">
+                            <button type="button" data-val="0" class="btn formButtonOk"><i class="icon-ok"></i> Save</button>
+                            <button data-val="0" type="button" class="btn formButtonCancel">Cancel</button>
+                            <input type="hidden" id="txtCameraCode0" />
+                            <input type="hidden" id="txtTimelapseId" />
+                            <input type="hidden" id="txtLogoFile" />
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <div class="form-control">
+                            <div id="divAlert0" class="alert alert-error hide">
+                                <button class="close" data-dismiss="alert"></button>
+                                <span>Enter any email and password.</span>
+                            </div>
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+            <div class="span4">
+                <div class="row-fluid">
+                    <img id="imgPreviewLoader" src="assets/img/cam-img.jpg" class="img-box">
+                    <img id="imgPreview" class="img-box hide">
+                </div>
+                <div class="row-fluid padding-top3">
+                    <img id="imgCamStatus" class="hide" src="assets/img/online.png" />
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
