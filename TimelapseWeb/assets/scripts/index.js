@@ -9,6 +9,7 @@ var Index = function () {
     var utilsApi = "http://astimegoes.by/v1";
     var ApiAction = 'POST';
     var apiContentType = 'application/json; charset=utf-8';
+    var loopCount = 1;
 
     $("#btnAnotherUser").live("click", function () {
         $("#user_email").val("");
@@ -218,6 +219,7 @@ var Index = function () {
             //Uncomment when fixed add camera functionality
             //$("#lnNewCamera").show();
             //$("#lnNewCameraCol").hide();
+            handleFileupload();
             getCameras(true);
             $('.timerange').timepicker({
                 minuteStep: 1,
@@ -228,19 +230,8 @@ var Index = function () {
             var dates = $(".daterange").datepicker({
                 format: 'dd/mm/yyyy',
                 minDate: new Date()
-                /*onSelect: function (selectedDate) {
-                    var option = this.id.indexOf("txtFromDateRange") == 0 ? "minDate" : "maxDate",
-                        instance = $(this).data("datepicker"),
-                        date = $.datepicker.parseDate(instance.settings.dateFormat || $.datepicker._defaults.dateFormat, selectedDate, instance.settings);
-                    dates.not(this).datepicker("option", option, date);
-                }*/
             });
             $("#newTimelapse").slideDown(500);
-            //var cams = JSON.parse(localStorage.getItem("timelapseCameras"));
-            //for (var i = 0; i < cams.cameras.length; i++) {
-                //if (cameras[i].status == "Active")
-             //   $("#ddlCameras0").append('<option value="' + cams.cameras[i].id + '" >' + cams.cameras[i].name + '</option>');
-            //}
         });
     }
 
@@ -366,7 +357,7 @@ var Index = function () {
         }
         
         var camCode = "/users/" + sessionStorage.getItem("timelapseUserId");
-        if (timelapseId != "0") {
+        if ($("#txtTimelapseId").val() != "") {
             ApiAction = 'PUT';
             apiContentType = "application/x-www-form-urlencoded";
             camCode = "/" + $("#txtCameraCode" + timelapseId).val() + "/users/" + sessionStorage.getItem("timelapseUserId");
@@ -391,9 +382,40 @@ var Index = function () {
             "interval": $("#ddlIntervals" + timelapseId).val(),
             "fps": $("#ddlFrameRate" + timelapseId).val()
         };
+        
+        if ($('.table-striped td.name').html() != undefined) {
+            $(".fileupload-buttonbar").hide();
+            $("#divAlert" + timelapseId).removeClass("alert-error").addClass("alert-info");
+            $("#divAlert" + timelapseId).slideDown();
+            $("#divAlert" + timelapseId + " span").html('<img src="assets/img/loader3.gif"/>&nbsp;Saving Twitter Response');
+            $('.table-striped td.start button.btn').click();
+            setTimeout(function () { checkFileUploadAndSave(timelapseId, camCode, o, $(".progress-success").attr("aria-valuemin")); }, 1000);
+        }
+        else
+            checkFileUploadAndSave(timelapseId, camCode, o, null);
+    });
+
+    var fileuploadFinish = function (timelapseId, camCode, o, percentage) {
+        checkFileUploadAndSave(timelapseId, camCode, o, percentage);
+    }
+
+    var checkFileUploadAndSave = function (timelapseId, camCode, o, percentage) {
         $("#divAlert" + timelapseId).removeClass("alert-error").addClass("alert-info");
         $("#divAlert" + timelapseId).slideDown();
         $("#divAlert" + timelapseId + " span").html('<img src="assets/img/loader3.gif"/>&nbsp;Saving timelapse');
+
+        if (percentage != null && parseInt(percentage) <= 100) {
+            setTimeout(function () { fileuploadFinish(timelapseId, camCode, o, $(".progress-success").attr("aria-valuemin")); }, 1000);
+            return;
+        } else {
+            if ($('.table-striped td.preview a').length > 0)
+                $("#txtLogoFile").val($('.table-striped td.preview a').attr("href"));
+            else if ($("#txtLogoFile").val()=='')
+                $("#txtLogoFile").val('-');
+        }
+        o.watermark_position = $("#ddlWatermarkPos" + timelapseId).val();
+        o.watermark_file = $("#txtLogoFile").val();
+        
         $.ajax({
             type: ApiAction,
             url: timelapseApiUrl + camCode,
@@ -405,8 +427,9 @@ var Index = function () {
             },*/
             success: function (data) {
                 $("#divAlert" + timelapseId + " span").html('Timelapse saved.');
-
-                if (timelapseId == "0") {
+                if ($("#txtCameraCode0").val() != "")
+                    $("#tab" + $("#txtCameraCode0").val()).remove();
+                //if (timelapseId == "0") {
                     $("#divTimelapses").prepend(getHtml(data));
                     $("#newTimelapse").slideUp(500, function () { $("#newTimelapse").html(""); });
                     $("#lnNewTimelapse").show();
@@ -414,10 +437,10 @@ var Index = function () {
                     if ($(".timelapseContainer").css("display") == "none")
                         $(".timelapseContainer").fadeIn();
                     $("#divContainer" + data.id).slideDown(500);
-                } else {
+                /*} else {
                     $("#timelapseTitle" + timelapseId).html($("#txtTitle" + timelapseId).val());
-                }
-                    
+                }*/
+
                 ApiAction = 'POST';
                 apiContentType = 'application/json; charset=utf-8';
                 setTimeout(function () {
@@ -429,7 +452,7 @@ var Index = function () {
                 $("#divAlert" + timelapseId + " span").html('Timelapse could not be saved.');
             }
         });
-    });
+    }
 
     $(".cameraformButtonOk").live("click", function () {
         var caneraSnaps;
@@ -536,7 +559,7 @@ var Index = function () {
         currentTime.setSeconds(0);
         currentTime.setMilliseconds(0);
 
-        if (fd < currentTime) {
+        if ($("#txtTimelapseId").val() == "" && fd < currentTime) {
             $("#divAlert" + timelapseId).slideDown();
             $("#divAlert" + timelapseId + " span").html("From date cannot be less than current time.");
             return false;
@@ -608,6 +631,7 @@ var Index = function () {
                         showMeridian: false,
                         defaultTime: false
                     });
+                    handleFileupload();
                     var dates = $(".daterange").datepicker({
                         format: 'dd/mm/yyyy',
                         minDate: new Date()
@@ -646,40 +670,63 @@ var Index = function () {
             return "Paused";
     }
 
-    var getVideoPlayer = function (cameraId, mp4, jpg, timelapseId) {
+    var getVideoPlayer = function (cameraId, mp4, jpg, timelapseId, logoFile) {
         $.ajax({
-            type: "GET",
+            type: "POST",
             crossDomain: true,
-            url: "https://api.evercam.io/v1/cameras/" + cameraId + "/live.json",
+            url: EvercamApi + "/cameras/" + cameraId + "/snapshots.json",
             beforeSend: function (xhrObj) {
                 xhrObj.setRequestHeader("Authorization", sessionStorage.getItem("oAuthTokenType") + " " + sessionStorage.getItem("oAuthToken"));
             },
-            data: { with_data: true },
             contentType: "application/json; charset=utf-8",
             dataType: "json",
-            success: function (res) {
-                var html = '<video data-setup="{}" poster="' + res.data + '" preload="none" controls="" class="video-js vjs-default-skin video-bg-width" id="vde4b3u05e9y">';
-                html += '<source type="video/mp4" src="' + mp4 + '"></source>';
-                html += '</video>';
-                $("#divVideoContainer" + timelapseId).html(html);
+            success: function (snapshot) {
+                $.ajax({
+                    type: "GET",
+                    crossDomain: true,
+                    url: EvercamApi + "/cameras/" + cameraId + "/snapshots/" + snapshot.snapshots[0].created_at + ".json",
+                    beforeSend: function (xhrObj) {
+                        xhrObj.setRequestHeader("Authorization", sessionStorage.getItem("oAuthTokenType") + " " + sessionStorage.getItem("oAuthToken"));
+                    },
+                    data: { with_data: true },
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    success: function (res) {
+                        var html = '';
+                        //if (logoFile != null && logoFile != '')
+                            //html += '<a style="display:block;position:absolute;opacity:1;"><img src="' + logoFile + '" /></a>';
+                        html += '<video data-setup="{}" poster="' + res.snapshots[0].data + '" preload="none" controls="" class="video-js vjs-default-skin video-bg-width" id="vde4b3u05e9y">';
+                        html += '<source type="video/mp4" src="' + mp4 + '"></source>';
+                        html += '</video>';
+                
+                        $("#divVideoContainer" + timelapseId).html(html);
+                    },
+                    error: function (xhrc, ajaxOptionsc, thrownErrorc) {
+                        loadDefaultImage(jpg, mp4, timelapseId);
+                    }
+                });
             },
             error: function (xhrc, ajaxOptionsc, thrownErrorc) {
-                var img = new Image();
-                img.onerror = function (evt) {
-                    var html = '<video data-setup="{}" poster="assets/img/timelapse.jpg" preload="none" controls="" class="video-js vjs-default-skin video-bg-width" id="vde4b3u05e9y">';
-                    html += '<source type="video/mp4" src="' + mp4 + '"></source>';
-                    html += '</video>';
-                    $("#divVideoContainer" + timelapseId).html(html);
-                };
-                img.onload = function (evt) {
-                    var html = '<video data-setup="{}" poster="' + jpg + '" preload="none" controls="" class="video-js vjs-default-skin video-bg-width" id="vde4b3u05e9y">';
-                    html += '<source type="video/mp4" src="' + mp4 + '"></source>';
-                    html += '</video>';
-                    $("#divVideoContainer" + timelapseId).html(html);
-                };
-                img.src = jpg;
+                loadDefaultImage(jpg, mp4, timelapseId);
             }
         });
+    }
+
+    var loadDefaultImage = function (jpg, mp4, timelapseId) {
+        var img = new Image();
+        img.onerror = function (evt) {
+            var html = '<video data-setup="{}" poster="assets/img/timelapse.jpg" preload="none" controls="" class="video-js vjs-default-skin video-bg-width" id="vde4b3u05e9y">';
+            html += '<source type="video/mp4" src="' + mp4 + '"></source>';
+            html += '</video>';
+            $("#divVideoContainer" + timelapseId).html(html);
+        };
+        img.onload = function (evt) {
+            var html = '<video data-setup="{}" poster="' + jpg + '" preload="none" controls="" class="video-js vjs-default-skin video-bg-width" id="vde4b3u05e9y">';
+            html += '<source type="video/mp4" src="' + mp4 + '"></source>';
+            html += '</video>';
+            $("#divVideoContainer" + timelapseId).html(html);
+        };
+        img.src = jpg;
     }
     
     var getDate = function () {
@@ -691,12 +738,14 @@ var Index = function () {
         var cameraOptions = '';
         var timezone = '';
         var cameraOffline = false;
+        var cameraName = '';
         var cams = JSON.parse(localStorage.getItem("timelapseCameras"));
         if (cams != null) {
             for (var i = 0; i < cams.cameras.length; i++) {
                 var selected = '';
                 if (cams.cameras[i].id == data.camera_id) {
                     timezone = cams.cameras[i].timezone;
+                    cameraName = cams.cameras[i].name;
                     selected = 'selected';
                     if (cams.cameras[i].status == 'Offline')
                         cameraOffline = true;
@@ -720,9 +769,10 @@ var Index = function () {
             }
         }
 
-        var html = '    <div id="tab' + data.code + '" class="header-bg">';
+        var html = '    <div id="tab' + data.code + '">';
+        html += '        <div class="header-bg">';
         html += '          <div class="row-fluid box-header-padding" data-val="' + data.id + '">';
-        html += '              <div id="timelapseTitle' + data.id + '" class="timelapse-labelhd timelapse-label">' + data.title + '</div>';
+        html += '              <div id="timelapseTitle' + data.id + '" class="timelapse-labelhd timelapse-label">' + data.title + '&nbsp;<span class="timelapse-camera-name">' + cameraName + '</span></div>';
         html += '              <div id="timelapseStatus' + data.code + '" class="timelapse-recordhd timelapse-label-status text-right">';
         //if (data.status == 1)
         //    html += '               <div class="timelapse-recording"></div>';
@@ -736,7 +786,7 @@ var Index = function () {
         html += '              <div id="divVideoContainer' + data.id + '" class="span6">';
         //html += '                  <iframe style="width:100%; border:0;height:360px;" src="loadvideo.html?id=' + data.camera_id + '&mp4=' + data.mp4_url + '&webm=' + data.webm_url + '&jpg=' + data.jpg_url + '" frameborder="0" allowfullscreen></iframe>';
 
-        getVideoPlayer(data.camera_id, data.mp4_url, data.jpg_url, data.id);
+        getVideoPlayer(data.camera_id, data.mp4_url, data.jpg_url, data.id, data.watermark_file);
         html += '                  <video data-setup="{}" preload="none" controls="" class="video-js vjs-default-skin video-bg-width" id="vde4b3u05e9y">';
         html += '                   <source type="video/mp4" src="' + data.mp4_url + '"></source>';
         html += '                  </video>';
@@ -748,8 +798,8 @@ var Index = function () {
         html += '                          <tr>';
         html += '                              <th class="tbl-hd1"><a class="tab-a block' + data.id + ' selected-tab" href="javascript:;" data-ref="#embedcode' + data.id + '" data-val="' + data.id + '">Embed Code</a></th>';
         html += '                              <th class="tbl-hd2"><a class="tab-a block' + data.id + '" href="javascript:;" data-ref="#stats' + data.id + '" data-val="' + data.id + '">Stats</a></th>';
-        html += '                              <th class="tbl-hd2"><a class="tab-a block' + data.id + '" href="javascript:;" data-ref="#setting' + data.id + '" data-val="' + data.id + '">Settings</a></th>';
         html += '                              <th class="tbl-hd2"><a class="tab-a block' + data.id + '" href="javascript:;" data-ref="#option' + data.id + '" data-val="' + data.id + '">Options</a></th>';
+        html += '                              <th class="tbl-hd3"><a class="tab-a2 block' + data.id + '" href="javascript:;" data-ref="#setting' + data.id + '" data-val="' + data.id + '">Settings&nbsp;&nbsp;<i class="icon-cog"></i></a></th>';
         html += '                          </tr>';
         html += '                       </thead>';
         html += '                       <tbody>';
@@ -767,11 +817,12 @@ var Index = function () {
         html += '                                       <div id="stats' + data.id + '" class="row-fluid hide">';
         html += '                                         <div class="timelapse-content-box">';
         html += '                                           <table class="table table-full-width" style="margin-bottom:0px;">';
-        html += '                                           <tr><td class="span2">Total Snapshots: </td><td class="span2" id="tdSnapCount' + data.code + '">' + data.snaps_count + '</td><td style="width:25px;text-align:right;" align="right"><img style="cursor:pointer;height:27px;" data-val="' + data.code + '" class="refreshStats" src="assets/img/refres-tile.png" alt="Refresh Stats" title="Refresh Stats"></td></tr>';
+        html += '                                           <tr><td class="span2">Total Snapshots: </td><td class="span2" id="tdSnapCount' + data.code + '">' + data.snaps_count + '</td><td style="width:25px;text-align:right;" align="right"><img id="imgRef' + data.id + '" style="cursor:pointer;height:27px;" data-val="' + data.code + '" class="refreshStats" src="assets/img/refres-tile.png" alt="Refresh Stats" title="Refresh Stats"></td></tr>';
         html += '                                           <tr><td class="span2">Timelapse Length: </td><td class="span3" colspan="2"  id="tdDuration' + data.code + '">' + data.duration + '</td></tr>';
         html += '                                           <tr><td class="span2">MP4 File Size: </td><td class="span3" colspan="2"  id="tdFileSize' + data.code + '">' + data.file_size + '</td></tr>';
+        html += '                                           <tr><td class="span2">Frames/sec.: </td><td class="span3" colspan="2">' + data.fps + ' fps</td></tr>';
         html += '                                           <tr><td class="span2">Resolution: </td><td class="span3" colspan="2"  id="tdResolution' + data.code + '">' + (data.snaps_count == 0 ? '640x480' : data.resolution) + 'px</td></tr>';
-        html += '                                           <tr><td class="span2">Created At: </td><td class="span3" colspan="2"  id="tdCreated' + data.code + '">' + (data.snaps_count == 0 ? getDate() : data.created_date) + '</td></tr>';
+        html += '                                           <tr><td class="span2">Created At: </td><td class="span3" colspan="2"  id="tdCreated' + data.code + '">' + (data.created_date) + '</td></tr>'; //data.snaps_count == 0 ? getDate() : 
         html += '                                           <tr><td class="span2">Last Snapshot At: </td><td class="span3" colspan="2"  id="tdLastSnapDate' + data.code + '">' + (data.snaps_count == 0 ? '---' : data.last_snap_date) + '</td></tr>';
         html += '                                           <tr><td class="span2">Camera Timezone: </td><td class="span3" colspan="2"  id="tdTimezone' + data.code + '">' + timezone + '</td></tr>';
         html += '                                           <tr><td class="span2">Timelapse Status: </td><td class="span3" colspan="2"  id="tdStatus' + data.code + '">' + (data.status_tag == null ? (data.status == 1 ? 'Now recording...' : '') : data.status_tag) + '</td></tr></table>';
@@ -787,16 +838,11 @@ var Index = function () {
         html += '                                                   </div>';
         html += '                                               </div>';
         html += '                                               <div class="control-group">';
-        html += '                                                   <label class="controlLabel">Camera</label>';
-        html += '                                                   <div class="Controls">';
-        html += '                                                       <select disabled id="ddlCameras' + data.id + '" class="span7 m-wrap"><option value="0">Select Camera</option>';
-        html += cameraOptions;
-        html += '                                                       </select>';
-        html += '                                                   </div>';
-        html += '                                               </div>';
-        html += '                                               <div class="control-group">';
         html += '                                                   <label class="controlLabel">Interval</label>';
         html += '                                                   <div class="Controls">';
+        html += '                                                       <select disabled id="ddlCameras' + data.id + '" class="span7 m-wrap hide"><option value="0">Select Camera</option>';
+        html += cameraOptions;
+        html += '                                                       </select>';
         html += '                                                       <select id="ddlIntervals' + data.id + '" class="span7 m-wrap">';
         html += '                                                           <option value="0" ' + (data.interval == "0" ? "selected" : "") + '>Select Interval</option>';
         html += '                                                           <option value="1" ' + (data.interval == "1" ? "selected" : "") + '>1 Frame Every 1 min</option>';
@@ -810,10 +856,26 @@ var Index = function () {
         html += '                                                       </select>';
         html += '                                                   </div>';
         html += '                                               </div>';
+
         html += '                                               <div class="control-group">';
-        html += '                                                   <label class="controlLabel">Frames/sec.</label>';
+        html += '                                                   <label class="controlLabel">Watermark Pos.</label>';
         html += '                                                   <div class="Controls">';
-        html += '                                                       <select disabled id="ddlFrameRate' + data.id + '" class="span7 m-wrap">';
+        html += '                                                       <select id="ddlLogoPositions' + data.id + '" class="span7 m-wrap">';
+        html += '                                                           <option value="-1" ' + (data.watermark_position == "0" ? "selected" : "") + '>Select Logo Position</option>';
+        html += '                                                           <option value="0" ' + (data.watermark_position == "1" ? "selected" : "") + '>Top Left</option>';
+        html += '                                                           <option value="1" ' + (data.watermark_position == "5" ? "selected" : "") + '>Top Right</option>';
+        html += '                                                           <option value="2" ' + (data.watermark_position == "15" ? "selected" : "") + '>Bottom Left</option>';
+        html += '                                                           <option value="3" ' + (data.watermark_position == "30" ? "selected" : "") + '>Bottom Right</option>';
+        html += '                                                       </select>';
+        html += '                                                       <input type="hidden" id="txtLogoFile' + data.id + '" value="' + data.watermark_file + '"/>';
+        html += '                                                   </div>';
+        html += '                                               </div>';
+
+        html += '                                               <div class="control-group">';
+        html += '                                                   <label class="controlLabel">Watermark</label>';
+        html += '                                                   <div class="Controls">';
+        html += '                                                       ';
+        html += '                                                       <select disabled id="ddlFrameRate' + data.id + '" class="span7 m-wrap hide">';
         html += '                                                           <option value="1" ' + (data.fps == "1" ? "selected" : "") + '>1 fps</option>';
         html += '                                                           <option value="2" ' + (data.fps == "2" ? "selected" : "") + '>2 fps</option>';
         html += '                                                           <option value="3" ' + (data.fps == "3" ? "selected" : "") + '>3 fps</option>';
@@ -915,13 +977,122 @@ var Index = function () {
         html += '                       </table>';
         html += '                   </div>';
         html += '               </div>';
-        html += '           </div><br />';
+        html += '           </div><br /></div>';
         //***********************************************************************************************************
         if (data.snaps_count == 0)
             setTimeout(function () {
                 reloadStats(data.code, null);
             }, 1000 * 60);
         return html;
+    }
+
+    $(".tab-a2").live("click", function () {
+        var clickedTab = $(this);
+        var id = clickedTab.attr("data-val");
+        $.ajax({
+            type: "GET",
+            crossDomain: true,
+            url: timelapseApiUrl + "/" + id,
+            beforeSend: function (xhrObj) {
+                //xhrObj.setRequestHeader("Authorization", sessionStorage.getItem("oAuthTokenType") + " " + sessionStorage.getItem("oAuthToken"));
+            },
+            //data: { include_shared: true },
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (res) {
+                $.get('NewTimelapse.html', function (data) {
+                    $("#newTimelapse").html(data);
+                    $("#lnNewTimelapse").hide();
+                    $("#lnNewTimelapseCol").show();
+                    //Uncomment when fixed add camera functionality
+                    //$("#lnNewCamera").show();
+                    //$("#lnNewCameraCol").hide();
+                    handleFileupload();
+                    getCameras(true, res.camera_id);
+                    
+                    $("#newTimelapse").slideDown(500);
+                    $("#txtTimelapseId").val(id);
+                    $("#txtTitle0").val(res.title);
+                    $("#ddlIntervals0").val(res.interval);
+                    $("#ddlFrameRate0").val(res.fps);
+                    $("#txtCameraCode0").val(res.code)
+                    $("#ddlFrameRate0").attr("disabled", "disabled");
+                    $("#ddlCameras0").attr("disabled", "disabled");
+                    $("#ddlWatermarkPos0").val(res.watermark_position);
+                    if (res.watermark_file != null && res.watermark_file != '') {
+                        $("#txtLogoFile").val(res.watermark_file);
+                        $("#imgWatermarkLogo").attr('src', res.watermark_file);
+                        $("#imgWatermarkLogo").show();
+                        $(".fileinput-button span").html("Change file...")
+                    }
+                    if (!res.is_time_always) {
+                        $("#chkTimeRange0").attr("checked", "checked");
+                        $("#divTimeRange0").slideDown();
+                        var d = new Date(res.from_date);
+                        $("#txtFromTimeRange0").val(d.getHours() + ":" + d.getMinutes());//res.from_date.substring(ind, ind + 5)); //11+5=16
+                        d = new Date(res.to_date);
+                        $("#txtToTimeRange0").val(d.getHours() + ":" + d.getMinutes());//res.to_date.substring(ind, ind + 5));
+                    }
+                    if (!res.is_date_always) {
+                        $("#chkDateRange0").attr("checked", "checked");
+                        $("#divDateRange0").slideDown();
+                        $("#txtFromDateRange0").val(res.from_date.substring(0, 10));
+                        $("#txtToDateRange0").val(res.to_date.substring(0, 10));
+                    }
+
+                    jQuery('html,body').animate({
+                        scrollTop: jQuery('body').offset().top
+                    }, 'slow');
+                    $('.timerange').timepicker({
+                        minuteStep: 1,
+                        showSeconds: false,
+                        showMeridian: false,
+                        defaultTime: false
+                    });
+                    var dates = $(".daterange").datepicker({
+                        format: 'dd/mm/yyyy',
+                        minDate: new Date()
+                    });
+                });
+            },
+            error: function (xhrc, ajaxOptionsc, thrownErrorc) { }
+        });
+    });
+
+    $(".uploadWatermark").live("click", function () {
+        $("#fulDialog").dialog({
+            overlay: { backgroundColor: "white", opacity: 0 },
+            show: { effect: "explode", duration: 300 },
+            //height: 480,
+            width: 640,
+            position: ['center', 20],
+            title: "Upload Watermark Logo",
+            modal: true,
+            create: function (event, ui) {
+                $("body").css({ overflow: 'hidden' })
+            },
+            beforeClose: function (event, ui) {
+                $("body").css({ overflow: 'inherit' })
+            },
+            buttons: [
+                {
+                    text: "Close",
+                    click: function () {
+                        $(this).dialog("close");
+                    }
+                }]
+        });
+        $(".ui-dialog-titlebar-close").hide();
+    });
+
+    var handleFileupload = function () {
+
+        // Initialize the jQuery File Upload widget:
+        $('#fileupload').fileupload({
+            // Uncomment the following to send cross-domain cookies:
+            //xhrFields: {withCredentials: true},
+            url: 'assets/plugins/jquery-file-upload/server/php/'
+        });
     }
 
     $(".refreshStats").live("click", function () {
@@ -938,10 +1109,16 @@ var Index = function () {
             dataType: 'json',
             ContentType: 'application/json; charset=utf-8',
             success: function (data) {
-                if (data.snaps_count == 0) {
+                if (data.snaps_count == 0 && loopCount < 6) {
+                    loopCount++;
                     setTimeout(function () {
-                        reloadStats(data.code, null);
+                        reloadStats(data.code, img);
                     }, 1000 * 60);
+                }
+                else if (loopCount > 5) {
+                    loopCount = 1;
+                    if (img != null)
+                        $("#imgRef"+data.id).attr("src", "assets/img/refres-tile.png");
                 }
                 else {
                     $("#tdSnapCount" + code).html(data.snaps_count);
@@ -955,8 +1132,7 @@ var Index = function () {
                     }
                     if (data.status_tag != null)
                         $("#tdStatus" + code).html(data.status_tag);
-                    if (img != null)
-                        img.attr("src", "assets/img/refres-tile.png");
+                    $("#imgRef" + data.id).attr("src", "assets/img/refres-tile.png");
                 }
             },
             error: function (xhr, textStatus) {
@@ -996,6 +1172,8 @@ var Index = function () {
 
     $(".tab-a").live("click", function () {
         var clickedTab = $(this);
+        if (clickedTab.html() == 'Settings')
+            return;
         var id = clickedTab.attr("data-val");
         $(".block" + id).removeClass("selected-tab");
         clickedTab.addClass("selected-tab");
@@ -1011,7 +1189,7 @@ var Index = function () {
         setTimeout(function () { self.select(); }, 30);
     });
     
-    var getCameras = function (reload) {
+    var getCameras = function (reload,cameraId) {
         $.ajax({
             type: "GET",
             crossDomain: true,
@@ -1019,86 +1197,31 @@ var Index = function () {
             beforeSend: function (xhrObj) {
                 xhrObj.setRequestHeader("Authorization", sessionStorage.getItem("oAuthTokenType") + " " + sessionStorage.getItem("oAuthToken"));
             },
-            data: { include_shared: true },
+            data: { include_shared: true, thumbnail: true },
             contentType: "application/json; charset=utf-8",
             dataType: "json",
             success: function (res) {
                 localStorage.setItem("timelapseCameras", JSON.stringify(res));
-                //hasSharedCams(reload);
-                bindDropDown(reload);
+                bindDropDown(reload, cameraId);
             },
             error: function (xhrc, ajaxOptionsc, thrownErrorc) { }
         });
     }
 
-    var hasSharedCams = function (reload) {
-        $.ajax({
-            type: "GET",
-            crossDomain: true,
-            url: EvercamApi + "/shares/users/" + sessionStorage.getItem("timelapseUserId") + ".json",
-            beforeSend: function (xhrObj) {
-                xhrObj.setRequestHeader("Authorization", sessionStorage.getItem("oAuthTokenType") + " " + sessionStorage.getItem("oAuthToken"));
-            },
-            contentType: "application/json; charset=utf-8",
-            dataType: "json",
-            success: function (res) {
-                var ids = "";
-                for (var i = 0; i < res.shares.length; i++) {
-                    ids += res.shares[i].camera_id + ",";
-                }
-                if (ids != "") {
-                    ids = ids.substring(0, ids.length - 1);
-                    GetSharedCameras(ids, reload);
-                }
-                else {
-                    bindDropDown(reload);
-                }
-            }
-        });
-    }
-
-    var GetSharedCameras = function (ids, reload) {
-        var htmlNavShareCams = '';
-        var cameraId = getQueryStringByName("cam");
-        $.ajax({
-            type: "GET",
-            crossDomain: true,
-            url: EvercamApi + "/cameras.json",
-            beforeSend: function (xhrObj) {
-                xhrObj.setRequestHeader("Authorization", sessionStorage.getItem("oAuthTokenType") + " " + sessionStorage.getItem("oAuthToken"));
-            },
-            data: { ids: ids },
-            contentType: "application/json; charset=utf-8",
-            dataType: "json",
-            success: function (res) {
-                localStorage.setItem("sharedcameras", JSON.stringify(res));
-                bindDropDown(reload);
-                
-            },
-            error: function (xhrc, ajaxOptionsc, thrownErrorc) {
-
-            }
-        });
-    }
-
-    var bindDropDown = function (reload) {
+    var bindDropDown = function (reload, cameraId) {
         if (reload) {
             var cams = JSON.parse(localStorage.getItem("timelapseCameras"));
             for (var i = 0; i < cams.cameras.length; i++) {
                 var css = 'onlinec';
                 if (!cams.cameras[i].is_online)
                     css = 'offlinec';
-                if (cams.cameras[i].external != null && cams.cameras[i].external != undefined)
-                    $("#ddlCameras0").append('<option class="' + css + '" value="' + cams.cameras[i].id + '" >' + cams.cameras[i].name + '</option>');
-            }
-            cams = JSON.parse(localStorage.getItem("sharedcameras"));
-            if (cams != null && cams != undefined) {
-                for (var i = 0; i < cams.cameras.length; i++) {
-                    var css = 'onlinec';
-                    if (!cams.cameras[i].is_online)
-                        css = 'offlinec';
-                    $("#ddlCameras0").append('<option class="' + css + '" value="' + cams.cameras[i].id + '" >' + cams.cameras[i].name + '</option>');
+                var isSelect = '';
+                if (cameraId == cams.cameras[i].id) {
+                    isSelect = 'selected="selected"';
+                    loadSelectedCamImage(cameraId);
                 }
+                if (cams.cameras[i].external != null && cams.cameras[i].external != undefined)
+                    $("#ddlCameras0").append('<option class="' + css + '" data-val="' + cams.cameras[i].thumbnail + '" ' + isSelect + ' value="' + cams.cameras[i].id + '" >' + cams.cameras[i].name + '</option>');
             }
             $("#imgCamLoader").hide();
             $("#ddlCameras0").select2({
@@ -1117,7 +1240,11 @@ var Index = function () {
     var format = function (state) {
         if (!state.id) return state.text;
         if (state.id == "0") return state.text;
-        return "<img class='flag' src='assets/img/" + state.css + ".png'/>&nbsp;&nbsp;" + state.text;
+        //return "<img class='flag' src='assets/img/" + state.css + ".png'/>&nbsp;&nbsp;" + state.text;
+        if (state.element[0].attributes[1].nodeValue == "null")
+            return "<table style='width:100%;'><tr><td style='width:90%;'><img style='width:35px;height:30px;' class='flag' src='assets/img/cam-img-small.jpg'/>&nbsp;&nbsp;" + state.text + "</td><td style='width:10%;' align='right'>" + "<img style='margin-top: -6px;' class='flag' src='assets/img/" + state.css + ".png'/>" + "</td></tr></table>";
+        else
+            return "<table style='width:100%;'><tr><td style='width:90%;'><img style='width:35px;height:30px;' class='flag' src='" + state.element[0].attributes[1].nodeValue + "'/>&nbsp;&nbsp;" + state.text + "</td><td style='width:10%;' align='right'>" + "<img class='flag' style='margin-top: -6px;' src='assets/img/" + state.css + ".png'/>" + "</td></tr></table>";
     }
 
     var getUsersInfo = function () {
@@ -1135,10 +1262,10 @@ var Index = function () {
             dataType: "json",
             success: function (res) {
                 loggedInUser = res.users[0];
-                if (res.users[0].forename == "" && res.users[0].lastname == "")
+                if (res.users[0].firstname == "" && res.users[0].lastname == "")
                     return;
-                sessionStorage.setItem("timelapseUsername", res.users[0].forename + " " + res.users[0].lastname);
-                $("#displayUsername").html(res.users[0].forename + " " + res.users[0].lastname)
+                sessionStorage.setItem("timelapseUsername", res.users[0].firstname + " " + res.users[0].lastname);
+                $("#displayUsername").html(res.users[0].firstname + " " + res.users[0].lastname)
             },
             error: function (xhrc, ajaxOptionsc, thrownErrorc) { }
         });
@@ -1247,6 +1374,10 @@ var Index = function () {
     $("#ddlCameras0").live("change", function () {
         var cameraId = $(this).val();
         //$("#imgCamStatus").hide();
+        loadSelectedCamImage(cameraId);
+    });
+
+    var loadSelectedCamImage = function (cameraId) {
         $("#imgPreview").hide();
         $("#imgPreviewLoader").show();
         $("#imgPreviewLoader").attr('src', 'assets/img/ajaxloader.gif');
@@ -1261,16 +1392,20 @@ var Index = function () {
             contentType: "application/json; charset=utf-8",
             dataType: "json",
             success: function (res) {
-                $("#imgPreview").attr('src', res.data);
-                $("#imgPreview").show();
-                $("#imgPreviewLoader").hide();
-                $("#imgPreviewLoader").attr('src', 'assets/img/cam-img.jpg');
+                if (res.data == null || res.data == undefined) {
+                    $("#imgPreviewLoader").attr('src', 'assets/img/cam-img.jpg');
+                } else {
+                    $("#imgPreview").attr('src', res.data);
+                    $("#imgPreview").show();
+                    $("#imgPreviewLoader").hide();
+                    $("#imgPreviewLoader").attr('src', 'assets/img/cam-img.jpg');
+                }
             },
             error: function (xhrc, ajaxOptionsc, thrownErrorc) {
                 $("#imgPreviewLoader").attr('src', 'assets/img/cam-img.jpg');
             }
         });
-    })
+    };
 
     var redirectHome = function () {
         $(".showlist").bind("click", function () {
@@ -1281,6 +1416,7 @@ var Index = function () {
     return {
         
         init: function () {
+            handleFileupload();
             redirectHome();
             getUserLocalIp();
             handleLoginSection();
