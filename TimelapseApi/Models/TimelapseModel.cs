@@ -77,8 +77,8 @@ namespace TimelapseApi.Models
             timelapse.DateAlways = model.is_date_always;
             timelapse.TimeAlways = model.is_time_always;
 
-            DateTime from = new DateTime(Utils.SQLMinDate.Year, Utils.SQLMinDate.Month, Utils.SQLMinDate.Day, 0, 0, 0, 0);
-            DateTime to = new DateTime(Utils.SQLMaxDate.Year, Utils.SQLMaxDate.Month, Utils.SQLMaxDate.Day, 23, 59, 59, 000);
+            DateTime from = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 0, 0, 0, 0);
+            DateTime to = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 23, 59, 59, 000);
             DateTime f = from;
             DateTime t = to;
 
@@ -225,8 +225,8 @@ namespace TimelapseApi.Models
             model.duration = timelapse.Duration;
             model.resolution = timelapse.Resolution;
             model.privacy = timelapse.Privacy;
-            model.from_date = Utils.ConvertFromUtc(timelapse.FromDT, timelapse.TimeZone).ToString();
-            model.to_date = Utils.ConvertFromUtc(timelapse.ToDT, timelapse.TimeZone).ToString();
+            model.from_date = Utils.ConvertFromUtc(timelapse.FromDT, timelapse.TimeZone).ToString("MM/dd/yyyy HH:mm:ss");
+            model.to_date = Utils.ConvertFromUtc(timelapse.ToDT, timelapse.TimeZone).ToString("MM/dd/yyyy HH:mm:ss");
             model.is_date_always = timelapse.DateAlways;
             model.is_time_always = timelapse.TimeAlways;
             model.enable_md = timelapse.EnableMD;

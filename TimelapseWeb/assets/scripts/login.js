@@ -5,7 +5,7 @@ var Login = function () {
     var EvercamApi = "https://api.evercam.io/v1";
         
     var onBodyLoad = function () {
-        if (sessionStorage.getItem("oAuthToken") != null && sessionStorage.getItem("oAuthToken") != undefined)
+        if (localStorage.getItem("oAuthToken") != null && localStorage.getItem("oAuthToken") != undefined)
             window.location = 'index.html';
         $("#country").select2({
             placeholder: '<i class="icon-map-marker"></i>&nbsp;Select a Country',
@@ -151,7 +151,7 @@ var Login = function () {
             type: 'GET',
             url: 'https://dashboard.evercam.io/v1/cameras/azharmalik354e6fca21f79/snapshot.jpg.json',
             beforeSend: function (xhrObj) {
-                xhrObj.setRequestHeader("Authorization", sessionStorage.getItem("oAuthTokenType") + " 6731517ca0ff30248291cdf54392b9ad");
+                xhrObj.setRequestHeader("Authorization", localStorage.getItem("oAuthTokenType") + " 6731517ca0ff30248291cdf54392b9ad");
             },
             dataType: 'json',
             ContentType: 'application/x-www-form-urlencoded',
