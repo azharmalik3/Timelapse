@@ -251,7 +251,7 @@ namespace Timelapser
                     tempfile = CopyResizeImage(tempfile, dimension);
                     timeOutCount = 0;
                     index++;
-                    
+
                     //if (timelapse.Status != (int)TimelapseStatus.Processing)
                     TimelapseDao.UpdateStatus(timelapse.Code, TimelapseStatus.Processing, "Now recording...", timelapse.TimeZone);
 
@@ -259,18 +259,36 @@ namespace Timelapser
                 }
                 else
                 {
-                    tempfile = "";
-                    timeOutCount++;
-                    Utils.TimelapseLog(timelapse, "DownloadSnapshot Error: Failed Storage.DownloadFile()");
+                    throw new Exception("No Live Image");
                 }
             }
             catch (Exception x)
             {
-                timeOutCount++;
-                Console.WriteLine("DownloadSnapshot Error: " + x.Message);
-                Utils.TimelapseLog(timelapse, "DownloadSnapshot Error: " + x.Message);
-                
-                return "";
+                //// retry - fallback
+                EvercamV1.Camera camera = Program.Evercam.GetCamera(Program.Camera.ID);
+                if (camera != null && camera.External != null && camera.External.Host != null && camera.IsOnline)
+                {
+                    SnapshotData snap = Utils.DoDownload(camera.External.Http.Jpg, camera.CameraUsername, camera.CameraPassword, true);
+                    if (Storage.SaveFile(tempfile, snap.Data))
+                    {
+                        //// should calculate original image ratio and give to ResizeImage function
+                        //// will resize the image and rename as source file. e.g. code.jpg
+                        tempfile = CopyResizeImage(tempfile, dimension);
+                        timeOutCount = 0;
+                        index++;
+
+                        //if (timelapse.Status != (int)TimelapseStatus.Processing)
+                        TimelapseDao.UpdateStatus(timelapse.Code, TimelapseStatus.Processing, "Now recording...", timelapse.TimeZone);
+
+                        TimelapseDao.UpdateLastSnapshot(timelapse.Code, DateTime.UtcNow);
+                    }
+                    else
+                    {
+                        tempfile = "";
+                        timeOutCount++;
+                        Utils.TimelapseLog(timelapse, "DownloadSnapshot Error: " + x.ToString());
+                    }
+                }
             }
             return tempfile;
         }
