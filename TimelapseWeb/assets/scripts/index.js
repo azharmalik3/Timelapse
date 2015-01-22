@@ -23,19 +23,19 @@ var Index = function () {
         $("#user_remember_me").attr("checked", false);
     });
 
-    var getParameterByName = function (name, searchString) {
+    var getParameterByName = function(name, searchString) {
         name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
         var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
-            results = regex.exec(searchString);//location.search);
+            results = regex.exec(searchString); //location.search);
         return results == null ? null : decodeURIComponent(results[1].replace(/\+/g, " "));
-    }
+    };
 
-    var getQueryStringByName = function (name) {
+    var getQueryStringByName = function(name) {
         name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
         var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
             results = regex.exec(location.search);
         return results == null ? null : decodeURIComponent(results[1].replace(/\+/g, " "));
-    }
+    };
 
     function toTitleCase(str) {
         //return str.replace(/\w\S*/g, function (txt) { return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase(); });
@@ -78,13 +78,20 @@ var Index = function () {
         form.submit();
     }
 
-    var format = function (state) {
+    var format = function(state) {
         if (!state.id) return state.text; // optgroup
         return "<img class='flag' src='assets/img/flags/" + state.id.toLowerCase() + ".png'/>&nbsp;&nbsp;" + state.text;
-    }
+    };
     
     var handleLoginSection = function () {
-        if (sessionStorage.getItem("oAuthToken") != null && sessionStorage.getItem("oAuthToken") != undefined) {
+        /* ENABLE FOR TESTING ONLY */
+        //localStorage.setItem("oAuthTokenType", "bearer");
+        //localStorage.setItem("oAuthToken", "6c4d4f7d71ebc042afd34372cb61396b");
+        //localStorage.setItem("tokenExpiry", "315568999");
+        //localStorage.setItem("timelapseUserId", "azharmalik3")
+        //localStorage.setItem("timelapseUsername", "Azhar Malik");
+        /* --------- END --------- */
+        if (localStorage.getItem("oAuthToken") != null && localStorage.getItem("oAuthToken") != undefined) {
             getMyTimelapse();
             getUsersInfo();
         }
@@ -110,12 +117,12 @@ var Index = function () {
                         success: function (res) {
                             if (res.userid != "null" && res.userid != '') {
                                 var userId = res.userid;
-                                sessionStorage.setItem("oAuthTokenType", hasTokenType);
-                                sessionStorage.setItem("oAuthToken", hasToken);
-                                sessionStorage.setItem("tokenExpiry", tokenExpiry);
+                                localStorage.setItem("oAuthTokenType", hasTokenType);
+                                localStorage.setItem("oAuthToken", hasToken);
+                                localStorage.setItem("tokenExpiry", tokenExpiry);
 
-                                sessionStorage.setItem("timelapseUserId", userId)
-                                sessionStorage.setItem("timelapseUsername", userId);
+                                localStorage.setItem("timelapseUserId", userId);
+                                localStorage.setItem("timelapseUsername", userId);
                                 window.location.hash = '';
                                 getUsersInfo();
                                 getCameras(false);
@@ -140,7 +147,7 @@ var Index = function () {
         }
     }
 
-    var clearPage = function () {
+    var clearPage = function() {
         $(".default-timelapse").html("");
         $(".default-timelapse").hide();
         $("#liUsername").show();
@@ -150,29 +157,28 @@ var Index = function () {
 
         $("#newTimelapse").html("");
         $("#newTimelapse").fadeOut();
-        
-    }
+    };
 
-    var handleLogout = function () {
-        $("#lnkLogout").bind("click", function () {
-            sessionStorage.removeItem("oAuthToken");
-            sessionStorage.removeItem("tokenExpiry");
-            sessionStorage.removeItem("oAuthTokenType");
-            sessionStorage.removeItem("timelapseUserId");
-            sessionStorage.removeItem("timelapseUsername");
+    var handleLogout = function() {
+        $("#lnkLogout").bind("click", function() {
+            localStorage.removeItem("oAuthToken");
+            localStorage.removeItem("tokenExpiry");
+            localStorage.removeItem("oAuthTokenType");
+            localStorage.removeItem("timelapseUserId");
+            localStorage.removeItem("timelapseUsername");
             localStorage.removeItem("timelapseCameras");
             localStorage.removeItem("sharedcameras");
-            window.location = 'login.html';            
+            window.location = 'login.html';
         });
-    }
+    };
 
-    var handleNewTimelapse = function () {
-        $("#lnNewTimelapse").bind("click", function () {
+    var handleNewTimelapse = function() {
+        $("#lnNewTimelapse").bind("click", function() {
             showTimelapseForm();
         });
 
-        $("#lnNewTimelapseCol").bind("click", function () {
-            $("#newTimelapse").slideUp(500, function () {
+        $("#lnNewTimelapseCol").bind("click", function() {
+            $("#newTimelapse").slideUp(500, function() {
                 $("#newTimelapse").html("");
                 $("#lnNewTimelapse").show();
                 $("#lnNewTimelapseCol").hide();
@@ -182,20 +188,20 @@ var Index = function () {
             $("#txtCameraCode0").val('');
         });
 
-        $("#lnNewCamera").bind("click", function () {
+        $("#lnNewCamera").bind("click", function() {
             showNewCameraForm();
         });
-        $("#lnNewCameraCol").bind("click", function () {
-            $("#newTimelapse").slideUp(500, function () {
+        $("#lnNewCameraCol").bind("click", function() {
+            $("#newTimelapse").slideUp(500, function() {
                 $("#newTimelapse").html("");
                 $("#lnNewCamera").show();
                 $("#lnNewCameraCol").hide();
             });
         });
-    }
+    };
 
-    var showNewCameraForm = function () {
-        $.get('NewCameraForm.html', function (data) {
+    var showNewCameraForm = function() {
+        $.get('NewCameraForm.html', function(data) {
             $("#newTimelapse").html(data);
             $("#lnNewCamera").hide();
             $("#lnNewCameraCol").show();
@@ -204,15 +210,15 @@ var Index = function () {
             $("#lnNewTimelapseCol").hide();
             $("#newTimelapse").slideDown(500);
         });
-    }
+    };
 
-    $(".newTimelapse").live("click", function () {
+    $(".newTimelapse").live("click", function() {
         showTimelapseForm();
         $("#divLoadingTimelapse").fadeOut();
-    })
+    });
 
-    var showTimelapseForm = function () {
-        $.get('NewTimelapse.html', function (data) {
+    var showTimelapseForm = function() {
+        $.get('NewTimelapse.html', function(data) {
             $("#newTimelapse").html(data);
             $("#lnNewTimelapse").hide();
             $("#lnNewTimelapseCol").show();
@@ -233,7 +239,7 @@ var Index = function () {
             });
             $("#newTimelapse").slideDown(500);
         });
-    }
+    };
 
     $('[name="TimeRange"]').live("click", function () {
         var id = $(this).attr("id");
@@ -255,11 +261,11 @@ var Index = function () {
             $("#divDateRange" + dataval).slideUp();
     });
 
-    var handleMyTimelapse = function () {
-        $("#lnMyTimelapse").bind("click", function () {
+    var handleMyTimelapse = function() {
+        $("#lnMyTimelapse").bind("click", function() {
             getMyTimelapse();
         });
-    }
+    };
 
     $(".formButtonCancel").live("click", function () {
         var id = $(this).attr("data-val");
@@ -339,7 +345,7 @@ var Index = function () {
             if (fromTime == toTime) {
                 $("#divAlert" + timelapseId).slideDown();
                 $("#divAlert" + timelapseId + " span").html('To time and from time cannot be same.');
-                return
+                return;
             }
         }
         var timezone = "GMT Standard Time";
@@ -356,15 +362,15 @@ var Index = function () {
             }
         }
         
-        var camCode = "/users/" + sessionStorage.getItem("timelapseUserId");
+        var camCode = "/users/" + localStorage.getItem("timelapseUserId");
         if ($("#txtTimelapseId").val() != "") {
             ApiAction = 'PUT';
             apiContentType = "application/x-www-form-urlencoded";
-            camCode = "/" + $("#txtCameraCode" + timelapseId).val() + "/users/" + sessionStorage.getItem("timelapseUserId");
+            camCode = "/" + $("#txtCameraCode" + timelapseId).val() + "/users/" + localStorage.getItem("timelapseUserId");
         }
         var o = {
             "camera_eid": $("#ddlCameras" + timelapseId).val(),
-            "access_token": sessionStorage.getItem("oAuthToken"),
+            "access_token": localStorage.getItem("oAuthToken"),
             "from_time": fromTime,
             "to_time": toTime,
             "from_date": fromDate,
@@ -395,27 +401,27 @@ var Index = function () {
             checkFileUploadAndSave(timelapseId, camCode, o, null);
     });
 
-    var fileuploadFinish = function (timelapseId, camCode, o, percentage) {
+    var fileuploadFinish = function(timelapseId, camCode, o, percentage) {
         checkFileUploadAndSave(timelapseId, camCode, o, percentage);
-    }
+    };
 
-    var checkFileUploadAndSave = function (timelapseId, camCode, o, percentage) {
+    var checkFileUploadAndSave = function(timelapseId, camCode, o, percentage) {
         $("#divAlert" + timelapseId).removeClass("alert-error").addClass("alert-info");
         $("#divAlert" + timelapseId).slideDown();
         $("#divAlert" + timelapseId + " span").html('<img src="assets/img/loader3.gif"/>&nbsp;Saving timelapse');
 
         if (percentage != null && parseInt(percentage) <= 100) {
-            setTimeout(function () { fileuploadFinish(timelapseId, camCode, o, $(".progress-success").attr("aria-valuemin")); }, 1000);
+            setTimeout(function() { fileuploadFinish(timelapseId, camCode, o, $(".progress-success").attr("aria-valuemin")); }, 1000);
             return;
         } else {
             if ($('.table-striped td.preview a').length > 0)
                 $("#txtLogoFile").val($('.table-striped td.preview a').attr("href"));
-            else if ($("#txtLogoFile").val()=='')
+            else if ($("#txtLogoFile").val() == '')
                 $("#txtLogoFile").val('-');
         }
         o.watermark_position = $("#ddlWatermarkPos" + timelapseId).val();
         o.watermark_file = $("#txtLogoFile").val();
-        
+
         $.ajax({
             type: ApiAction,
             url: timelapseApiUrl + camCode,
@@ -423,36 +429,36 @@ var Index = function () {
             dataType: 'json',
             ContentType: apiContentType,//'application/json; charset=utf-8',
             /*beforeSend: function (xhrObj) {
-                xhrObj.setRequestHeader("Authorization", "Basic " + sessionStorage.getItem("oAuthToken"));
+                xhrObj.setRequestHeader("Authorization", "Basic " + localStorage.getItem("oAuthToken"));
             },*/
-            success: function (data) {
+            success: function(data) {
                 $("#divAlert" + timelapseId + " span").html('Timelapse saved.');
                 if ($("#txtCameraCode0").val() != "")
                     $("#tab" + $("#txtCameraCode0").val()).remove();
                 //if (timelapseId == "0") {
-                    $("#divTimelapses").prepend(getHtml(data));
-                    $("#newTimelapse").slideUp(500, function () { $("#newTimelapse").html(""); });
-                    $("#lnNewTimelapse").show();
-                    $("#lnNewTimelapseCol").hide();
-                    if ($(".timelapseContainer").css("display") == "none")
-                        $(".timelapseContainer").fadeIn();
-                    $("#divContainer" + data.id).slideDown(500);
+                $("#divTimelapses").prepend(getHtml(data));
+                $("#newTimelapse").slideUp(500, function() { $("#newTimelapse").html(""); });
+                $("#lnNewTimelapse").show();
+                $("#lnNewTimelapseCol").hide();
+                if ($(".timelapseContainer").css("display") == "none")
+                    $(".timelapseContainer").fadeIn();
+                $("#divContainer" + data.id).slideDown(500);
                 /*} else {
                     $("#timelapseTitle" + timelapseId).html($("#txtTitle" + timelapseId).val());
                 }*/
 
                 ApiAction = 'POST';
                 apiContentType = 'application/json; charset=utf-8';
-                setTimeout(function () {
+                setTimeout(function() {
                     $("#divAlert" + timelapseId).slideUp();
                 }, 6000);
             },
-            error: function (xhr, textStatus) {
+            error: function(xhr, textStatus) {
                 $("#divAlert" + timelapseId).removeClass("alert-info").addClass("alert-error");
                 $("#divAlert" + timelapseId + " span").html('Timelapse could not be saved.');
             }
         });
-    }
+    };
 
     $(".cameraformButtonOk").live("click", function () {
         var caneraSnaps;
@@ -505,7 +511,7 @@ var Index = function () {
         $("#divAlert0").removeClass("alert-error").addClass("alert-info");
         $("#divAlert0").slideDown();
         $("#divAlert0 span").html('<img src="assets/img/loader3.gif"/>&nbsp;Saving Camera');
-        //Evercam.setBasicAuth("", "", sessionStorage.getItem("oAuthToken"));
+        //Evercam.setBasicAuth("", "", localStorage.getItem("oAuthToken"));
         //Evercam.Camera.create(o);
         $.ajax({
             type: "POST",
@@ -518,7 +524,7 @@ var Index = function () {
             dataType: 'json',
             ContentType: "application/x-www-form-urlencoded",//'application/json; charset=utf-8',
             beforeSend: function (xhrObj) {
-                xhrObj.setRequestHeader("Authorization", sessionStorage.getItem("oAuthTokenType") + " " + sessionStorage.getItem("oAuthToken"));
+                xhrObj.setRequestHeader("Authorization", localStorage.getItem("oAuthTokenType") + " " + localStorage.getItem("oAuthToken"));
             },
             success: function (data) {
                 $("#divAlert0 span").html('Camera saved.');
@@ -548,7 +554,7 @@ var Index = function () {
         });
     });
 
-    var validateDates = function (fromDate, toDate, timelapseId) {
+    var validateDates = function(fromDate, toDate, timelapseId) {
         var movieToStr = toDate.split("/");
         var movieFromStr = fromDate.split("/");
         var td = new Date(movieToStr[2], (movieToStr[1] - 1), movieToStr[0]);
@@ -586,9 +592,9 @@ var Index = function () {
             return false;
         }*/
         return true;
-    }
-    
-    var getMyTimelapse = function () {
+    };
+
+    var getMyTimelapse = function() {
         $(".default-timelapse").html("");
         $(".default-timelapse").hide();
         $("#liUsername").show();
@@ -599,32 +605,31 @@ var Index = function () {
         $("#newTimelapse").html("");
         $("#newTimelapse").fadeOut();
 
-        $("#displayUsername").html(sessionStorage.getItem("timelapseUsername"));
+        $("#displayUsername").html(localStorage.getItem("timelapseUsername"));
         $("#divLoadingTimelapse").fadeIn();
         $("#divLoadingTimelapse").html('<img src="assets/img/loader3.gif" alt="Loading..."/>&nbsp;Fetching Timelapses');
         $.ajax({
             type: 'GET',
-            url: timelapseApiUrl + "/users/" + sessionStorage.getItem("timelapseUserId"),
+            url: timelapseApiUrl + "/users/" + localStorage.getItem("timelapseUserId"),
             dataType: 'json',
             ContentType: 'application/json; charset=utf-8',
             /*beforeSend: function (xhrObj) {
-                xhrObj.setRequestHeader("Authorization", "Basic " + sessionStorage.getItem("oAuthToken"));
+                xhrObj.setRequestHeader("Authorization", "Basic " + localStorage.getItem("oAuthToken"));
             },*/
-            success: function (data) {
+            success: function(data) {
                 if (data.length == 0) {
                     $("#divTimelapses").html('');
                     $("#divLoadingTimelapse").html('You have not created any timelapses. <a href="javascript:;" class="newTimelapse">Click</a> to create one.');
-                }
-                else {
+                } else {
                     var count = 1;
-                    var html='';
+                    var html = '';
                     for (var i = 0; i < data.length; i++) {
                         html += getHtml(data[i]);
                     }
                     $("#divTimelapses").html(html);
                     $(".timelapseContainer").fadeIn();
                     $("#divLoadingTimelapse").fadeOut();
-                    
+
                     $('.timerange').timepicker({
                         minuteStep: 1,
                         showSeconds: false,
@@ -645,22 +650,22 @@ var Index = function () {
                     $("pre").snippet("html", { style: "whitengrey", clipboard: "assets/scripts/ZeroClipboard.swf", showNum: false });
                 }
             },
-            error: function (xhr, textStatus) {
+            error: function(xhr, textStatus) {
                 $("#divTimelapses").html('');
                 //$("#divLoadingTimelapse").show();
                 $("#divLoadingTimelapse").html('You have not created any timelapses. <a href="#">Click</a> to create one.');
             }
         });
-    }
+    };
 
-    var getTimeLapseStatus = function (status) {
+    var getTimeLapseStatus = function(status) {
         if (status == 0)
             return "New";
         else if (status == 1)
             return "Recording";
-        else if(status == 2)
+        else if (status == 2)
             return "Failed";
-        else if(status == 3)
+        else if (status == 3)
             return "Scheduled";
         else if (status == 4)
             return "Expired";
@@ -668,73 +673,71 @@ var Index = function () {
             return "Camera Not Found";
         else if (status == 6)
             return "Paused";
-    }
+    };
 
-    var getVideoPlayer = function (cameraId, mp4, jpg, timelapseId, logoFile) {
+    var getVideoPlayer = function(cameraId, mp4, jpg, timelapseId, logoFile) {
         $.ajax({
             type: "POST",
             crossDomain: true,
             url: EvercamApi + "/cameras/" + cameraId + "/snapshots.json",
-            beforeSend: function (xhrObj) {
-                xhrObj.setRequestHeader("Authorization", sessionStorage.getItem("oAuthTokenType") + " " + sessionStorage.getItem("oAuthToken"));
+            beforeSend: function(xhrObj) {
+                xhrObj.setRequestHeader("Authorization", localStorage.getItem("oAuthTokenType") + " " + localStorage.getItem("oAuthToken"));
             },
             contentType: "application/json; charset=utf-8",
             dataType: "json",
-            success: function (snapshot) {
+            success: function(snapshot) {
                 $.ajax({
                     type: "GET",
                     crossDomain: true,
                     url: EvercamApi + "/cameras/" + cameraId + "/snapshots/" + snapshot.snapshots[0].created_at + ".json",
-                    beforeSend: function (xhrObj) {
-                        xhrObj.setRequestHeader("Authorization", sessionStorage.getItem("oAuthTokenType") + " " + sessionStorage.getItem("oAuthToken"));
+                    beforeSend: function(xhrObj) {
+                        xhrObj.setRequestHeader("Authorization", localStorage.getItem("oAuthTokenType") + " " + localStorage.getItem("oAuthToken"));
                     },
                     data: { with_data: true },
                     contentType: "application/json; charset=utf-8",
                     dataType: "json",
-                    success: function (res) {
-                        var html = '';
-                        //if (logoFile != null && logoFile != '')
-                            //html += '<a style="display:block;position:absolute;opacity:1;"><img src="' + logoFile + '" /></a>';
-                        html += '<video data-setup="{}" poster="' + res.snapshots[0].data + '" preload="none" controls="" class="video-js vjs-default-skin video-bg-width" id="vde4b3u05e9y">';
+                    success: function(res) {
+                        var html = '<video data-setup="{}" poster="' + res.snapshots[0].data + '" preload="none" controls="" class="video-js vjs-default-skin video-bg-width" id="video-control-' + timelapseId + '">';
                         html += '<source type="video/mp4" src="' + mp4 + '"></source>';
                         html += '</video>';
-                
+
                         $("#divVideoContainer" + timelapseId).html(html);
+                        console.log($('#video-control-' + timelapseId).width());
                     },
-                    error: function (xhrc, ajaxOptionsc, thrownErrorc) {
-                        loadDefaultImage(jpg, mp4, timelapseId);
+                    error: function(xhrc, ajaxOptionsc, thrownErrorc) {
+                        loadDefaultImage(jpg, mp4, timelapseId, logoFile);
                     }
                 });
             },
-            error: function (xhrc, ajaxOptionsc, thrownErrorc) {
-                loadDefaultImage(jpg, mp4, timelapseId);
+            error: function(xhrc, ajaxOptionsc, thrownErrorc) {
+                loadDefaultImage(jpg, mp4, timelapseId, logoFile);
             }
         });
-    }
+    };
 
-    var loadDefaultImage = function (jpg, mp4, timelapseId) {
+    var loadDefaultImage = function(jpg, mp4, timelapseId, logoFile) {
         var img = new Image();
         img.onerror = function (evt) {
-            var html = '<video data-setup="{}" poster="assets/img/timelapse.jpg" preload="none" controls="" class="video-js vjs-default-skin video-bg-width" id="vde4b3u05e9y">';
+            var html = '<video data-setup="{}" poster="assets/img/timelapse.jpg" preload="none" controls="" class="video-js vjs-default-skin video-bg-width" id="video-control-' + timelapseId + '">';
             html += '<source type="video/mp4" src="' + mp4 + '"></source>';
             html += '</video>';
             $("#divVideoContainer" + timelapseId).html(html);
         };
         img.onload = function (evt) {
-            var html = '<video data-setup="{}" poster="' + jpg + '" preload="none" controls="" class="video-js vjs-default-skin video-bg-width" id="vde4b3u05e9y">';
+            var html = '<video data-setup="{}" poster="' + jpg + '" preload="none" controls="" class="video-js vjs-default-skin video-bg-width" id="video-control-' + timelapseId + '">';
             html += '<source type="video/mp4" src="' + mp4 + '"></source>';
             html += '</video>';
             $("#divVideoContainer" + timelapseId).html(html);
         };
         img.src = jpg;
-    }
-    
-    var getDate = function () {
+    };
+
+    var getDate = function() {
         var d = new Date();
         return FormatNumTo2(d.getDate()) + ' ' + getFullMonth(d.getMonth()) + ' ' + d.getFullYear() + ' ' + FormatNumTo2(d.getHours()) + ':' + FormatNumTo2(d.getMinutes());
-    }
+    };
 
-    var getHtml = function (data) {
+    var getHtml = function(data) {
         var cameraOptions = '';
         var timezone = '';
         var cameraOffline = false;
@@ -980,11 +983,11 @@ var Index = function () {
         html += '           </div><br /></div>';
         //***********************************************************************************************************
         if (data.snaps_count == 0)
-            setTimeout(function () {
+            setTimeout(function() {
                 reloadStats(data.code, null);
             }, 1000 * 60);
         return html;
-    }
+    };
 
     $(".tab-a2").live("click", function () {
         var clickedTab = $(this);
@@ -994,7 +997,7 @@ var Index = function () {
             crossDomain: true,
             url: timelapseApiUrl + "/" + id,
             beforeSend: function (xhrObj) {
-                //xhrObj.setRequestHeader("Authorization", sessionStorage.getItem("oAuthTokenType") + " " + sessionStorage.getItem("oAuthToken"));
+                //xhrObj.setRequestHeader("Authorization", localStorage.getItem("oAuthTokenType") + " " + localStorage.getItem("oAuthToken"));
             },
             //data: { include_shared: true },
             contentType: "application/json; charset=utf-8",
@@ -1023,21 +1026,23 @@ var Index = function () {
                         $("#txtLogoFile").val(res.watermark_file);
                         $("#imgWatermarkLogo").attr('src', res.watermark_file);
                         $("#imgWatermarkLogo").show();
-                        $(".fileinput-button span").html("Change file...")
+                        $(".fileinput-button span").html("Change file...");
                     }
+                    var fDt = new Date(res.from_date);
+                    var tDt = new Date(res.to_date);
                     if (!res.is_time_always) {
                         $("#chkTimeRange0").attr("checked", "checked");
                         $("#divTimeRange0").slideDown();
-                        var d = new Date(res.from_date);
-                        $("#txtFromTimeRange0").val(d.getHours() + ":" + d.getMinutes());//res.from_date.substring(ind, ind + 5)); //11+5=16
-                        d = new Date(res.to_date);
-                        $("#txtToTimeRange0").val(d.getHours() + ":" + d.getMinutes());//res.to_date.substring(ind, ind + 5));
+                        //var d = new Date(res.from_date);
+                        $("#txtFromTimeRange0").val(FormatNumTo2(fDt.getHours()) + ":" + FormatNumTo2(fDt.getMinutes()));//res.from_date.substring(ind, ind + 5)); //11+5=16
+                        //d = new Date(res.to_date);
+                        $("#txtToTimeRange0").val(FormatNumTo2(tDt.getHours()) + ":" + FormatNumTo2(tDt.getMinutes()));//res.to_date.substring(ind, ind + 5));
                     }
                     if (!res.is_date_always) {
                         $("#chkDateRange0").attr("checked", "checked");
                         $("#divDateRange0").slideDown();
-                        $("#txtFromDateRange0").val(res.from_date.substring(0, 10));
-                        $("#txtToDateRange0").val(res.to_date.substring(0, 10));
+                        $("#txtFromDateRange0").val(FormatNumTo2(fDt.getDate()) + "/" + FormatNumTo2(fDt.getMonth() + 1) + "/" + fDt.getFullYear());
+                        $("#txtToDateRange0").val(FormatNumTo2(tDt.getDate()) + "/" + FormatNumTo2(tDt.getMonth() + 1) + "/" + tDt.getFullYear());
                     }
 
                     jQuery('html,body').animate({
@@ -1085,7 +1090,7 @@ var Index = function () {
         $(".ui-dialog-titlebar-close").hide();
     });
 
-    var handleFileupload = function () {
+    var handleFileupload = function() {
 
         // Initialize the jQuery File Upload widget:
         $('#fileupload').fileupload({
@@ -1093,7 +1098,7 @@ var Index = function () {
             //xhrFields: {withCredentials: true},
             url: 'assets/plugins/jquery-file-upload/server/php/'
         });
-    }
+    };
 
     $(".refreshStats").live("click", function () {
         var img = $(this);
@@ -1102,25 +1107,24 @@ var Index = function () {
         reloadStats(code, img);
     });
 
-    var reloadStats = function (code, img) {
+    var reloadStats = function(code, img) {
         $.ajax({
             type: 'GET',
-            url: timelapseApiUrl + "/" + code + "/users/" + sessionStorage.getItem("timelapseUserId"),
+            url: timelapseApiUrl + "/" + code + "/users/" + localStorage.getItem("timelapseUserId"),
             dataType: 'json',
             ContentType: 'application/json; charset=utf-8',
-            success: function (data) {
+            timeout: 15000,
+            success: function(data) {
                 if (data.snaps_count == 0 && loopCount < 6) {
                     loopCount++;
-                    setTimeout(function () {
+                    $("#imgRef" + data.id).attr("src", "assets/img/refres-tile.png");
+                    setTimeout(function() {
                         reloadStats(data.code, img);
                     }, 1000 * 60);
-                }
-                else if (loopCount > 5) {
+                } else if (loopCount > 5) {
                     loopCount = 1;
-                    if (img != null)
-                        $("#imgRef"+data.id).attr("src", "assets/img/refres-tile.png");
-                }
-                else {
+                    $("#imgRef" + data.id).attr("src", "assets/img/refres-tile.png");
+                } else {
                     $("#tdSnapCount" + code).html(data.snaps_count);
                     $("#tdDuration" + code).html(data.duration);
                     $("#tdFileSize" + code).html(data.file_size);
@@ -1135,12 +1139,12 @@ var Index = function () {
                     $("#imgRef" + data.id).attr("src", "assets/img/refres-tile.png");
                 }
             },
-            error: function (xhr, textStatus) {
+            error: function(xhr, textStatus) {
                 if (img != null)
                     img.attr("src", "assets/img/refres-tile.png");
             }
         });
-    }
+    };
 
     $(".box-header-padding").live("click", function () {
         var id = $(this).attr("data-val");
@@ -1177,38 +1181,39 @@ var Index = function () {
         var id = clickedTab.attr("data-val");
         $(".block" + id).removeClass("selected-tab");
         clickedTab.addClass("selected-tab");
-        
-        $("#cameraCode" + id + " div.active").fadeOut(100, function () {
+
+        $("#cameraCode" + id + " div.active").fadeOut(100, function() {
             $(this).removeClass("active");
-            $(clickedTab.attr("data-ref")).fadeIn(100, function () { $(this).addClass("active"); });
-        })
+            $(clickedTab.attr("data-ref")).fadeIn(100, function() { $(this).addClass("active"); });
+        });
     });
 
     $('.pre-width1').live("mouseup", function () {
         var self = this;
         setTimeout(function () { self.select(); }, 30);
     });
-    
-    var getCameras = function (reload,cameraId) {
+
+    var getCameras = function(reload, cameraId) {
         $.ajax({
             type: "GET",
             crossDomain: true,
-            url: EvercamApi + "/users/" + sessionStorage.getItem("timelapseUserId") + "/cameras",
-            beforeSend: function (xhrObj) {
-                xhrObj.setRequestHeader("Authorization", sessionStorage.getItem("oAuthTokenType") + " " + sessionStorage.getItem("oAuthToken"));
+            url: EvercamApi + "/users/" + localStorage.getItem("timelapseUserId") + "/cameras",
+            beforeSend: function(xhrObj) {
+                xhrObj.setRequestHeader("Authorization", localStorage.getItem("oAuthTokenType") + " " + localStorage.getItem("oAuthToken"));
             },
             data: { include_shared: true, thumbnail: true },
             contentType: "application/json; charset=utf-8",
             dataType: "json",
-            success: function (res) {
+            success: function(res) {
                 localStorage.setItem("timelapseCameras", JSON.stringify(res));
                 bindDropDown(reload, cameraId);
             },
-            error: function (xhrc, ajaxOptionsc, thrownErrorc) { }
+            error: function(xhrc, ajaxOptionsc, thrownErrorc) {
+            }
         });
-    }
+    };
 
-    var bindDropDown = function (reload, cameraId) {
+    var bindDropDown = function(reload, cameraId) {
         if (reload) {
             var cams = JSON.parse(localStorage.getItem("timelapseCameras"));
             for (var i = 0; i < cams.cameras.length; i++) {
@@ -1229,15 +1234,15 @@ var Index = function () {
                 allowClear: true,
                 formatResult: format,
                 formatSelection: format,
-                escapeMarkup: function (m) {
+                escapeMarkup: function(m) {
                     return m;
                 }
             });
         } else
             getMyTimelapse();
-    }
+    };
 
-    var format = function (state) {
+    var format = function(state) {
         if (!state.id) return state.text;
         if (state.id == "0") return state.text;
         //return "<img class='flag' src='assets/img/" + state.css + ".png'/>&nbsp;&nbsp;" + state.text;
@@ -1245,31 +1250,32 @@ var Index = function () {
             return "<table style='width:100%;'><tr><td style='width:90%;'><img style='width:35px;height:30px;' class='flag' src='assets/img/cam-img-small.jpg'/>&nbsp;&nbsp;" + state.text + "</td><td style='width:10%;' align='right'>" + "<img style='margin-top: -6px;' class='flag' src='assets/img/" + state.css + ".png'/>" + "</td></tr></table>";
         else
             return "<table style='width:100%;'><tr><td style='width:90%;'><img style='width:35px;height:30px;' class='flag' src='" + state.element[0].attributes[1].nodeValue + "'/>&nbsp;&nbsp;" + state.text + "</td><td style='width:10%;' align='right'>" + "<img class='flag' style='margin-top: -6px;' src='assets/img/" + state.css + ".png'/>" + "</td></tr></table>";
-    }
+    };
 
-    var getUsersInfo = function () {
+    var getUsersInfo = function() {
         $.ajax({
             type: "GET",
             crossDomain: true,
             xhrFields: {
                 withCredentials: true
             },
-            url: EvercamApi + "/users/" + sessionStorage.getItem("timelapseUserId") + ".json",
-            beforeSend: function (xhrObj) {
-                xhrObj.setRequestHeader("Authorization", sessionStorage.getItem("oAuthTokenType") + " " + sessionStorage.getItem("oAuthToken"));
+            url: EvercamApi + "/users/" + localStorage.getItem("timelapseUserId") + ".json",
+            beforeSend: function(xhrObj) {
+                xhrObj.setRequestHeader("Authorization", localStorage.getItem("oAuthTokenType") + " " + localStorage.getItem("oAuthToken"));
             },
             contentType: "application/json; charset=utf-8",
             dataType: "json",
-            success: function (res) {
+            success: function(res) {
                 loggedInUser = res.users[0];
                 if (res.users[0].firstname == "" && res.users[0].lastname == "")
                     return;
-                sessionStorage.setItem("timelapseUsername", res.users[0].firstname + " " + res.users[0].lastname);
+                localStorage.setItem("timelapseUsername", res.users[0].firstname + " " + res.users[0].lastname);
                 $("#displayUsername").html(res.users[0].firstname + " " + res.users[0].lastname)
             },
-            error: function (xhrc, ajaxOptionsc, thrownErrorc) { }
+            error: function(xhrc, ajaxOptionsc, thrownErrorc) {
+            }
         });
-    }
+    };
 
     $('.commonLinks-icon').live('click', function (e) {
         var code = $(this).attr("data-val");
@@ -1303,27 +1309,26 @@ var Index = function () {
             event.initEvent('click', true, true);
             save.dispatchEvent(event);
             (window.URL || window.webkitURL).revokeObjectURL(save.href);
-        }
-            // for IE
+        }// for IE
         else if (!!window.ActiveXObject && document.execCommand) {
             var _window = window.open(fileURL, '_blank');
             _window.document.close();
-            _window.document.execCommand('SaveAs', true, fileName || fileURL)
+            _window.document.execCommand('SaveAs', true, fileName || fileURL);
             _window.close();
         }
     }
 
-    var RemoveTimelapse = function (code) {
-        $("#tab" + code).fadeOut(1000, function () {
+    var RemoveTimelapse = function(code) {
+        $("#tab" + code).fadeOut(1000, function() {
             $.ajax({
                 type: "DELETE",
-                url: timelapseApiUrl + "/" + code + "/users/" + sessionStorage.getItem("timelapseUserId"),
+                url: timelapseApiUrl + "/" + code + "/users/" + localStorage.getItem("timelapseUserId"),
                 /*beforeSend: function (xhrObj) {
-                    xhrObj.setRequestHeader("Authorization", "Basic " + sessionStorage.getItem("oAuthToken"));
+                    xhrObj.setRequestHeader("Authorization", "Basic " + localStorage.getItem("oAuthToken"));
                 },*/
                 contentType: "application/x-www-form-urlencoded",//"text/plain; charset=utf-8",
                 dataType: "json",
-                success: function (res) {
+                success: function(res) {
                     $("#tab" + code).remove();
                     if ($("#divTimelapses").html() == "") {
                         $("#divTimelapses").html('');
@@ -1331,13 +1336,14 @@ var Index = function () {
                         $("#divLoadingTimelapse").slideDown();
                     }
                 },
-                error: function (xhrc, ajaxOptionsc, thrownErrorc) { }
+                error: function(xhrc, ajaxOptionsc, thrownErrorc) {
+                }
             });
         });
-    }
-    
-    var getUserLocalIp = function () {
-        try{
+    };
+
+    var getUserLocalIp = function() {
+        try {
             if (window.XMLHttpRequest) xmlhttp = new XMLHttpRequest();
             else xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
 
@@ -1350,26 +1356,26 @@ var Index = function () {
                 var ipAddress = hostipInfo[i].split(":");
                 if (ipAddress[0] == "IP") return $("#user_local_Ip").val(ipAddress[1]);
             }
+        } catch(e) {
         }
-        catch(e){}
-    }
+    };
 
-    var handleFancyBox = function () {
+    var handleFancyBox = function() {
         $('.fancybox-media')
-                    .attr('rel', 'media-gallery')
-                    .fancybox({
-                        openEffect: 'none',
-                        closeEffect: 'none',
-                        prevEffect: 'none',
-                        nextEffect: 'none',
+            .attr('rel', 'media-gallery')
+            .fancybox({
+                openEffect: 'none',
+                closeEffect: 'none',
+                prevEffect: 'none',
+                nextEffect: 'none',
 
-                        arrows: false,
-                        helpers: {
-                            media: {},
-                            buttons: {}
-                        }
-                    });
-    }
+                arrows: false,
+                helpers: {
+                    media: { },
+                    buttons: { }
+                }
+            });
+    };
 
     $("#ddlCameras0").live("change", function () {
         var cameraId = $(this).val();
@@ -1386,7 +1392,7 @@ var Index = function () {
             crossDomain: true,
             url: EvercamApi + "/cameras/" + cameraId + "/live.json",
             beforeSend: function (xhrObj) {
-                xhrObj.setRequestHeader("Authorization", sessionStorage.getItem("oAuthTokenType") + " " + sessionStorage.getItem("oAuthToken"));
+                xhrObj.setRequestHeader("Authorization", localStorage.getItem("oAuthTokenType") + " " + localStorage.getItem("oAuthToken"));
             },
             data: { with_data: true },
             contentType: "application/json; charset=utf-8",
@@ -1407,11 +1413,11 @@ var Index = function () {
         });
     };
 
-    var redirectHome = function () {
-        $(".showlist").bind("click", function () {
+    var redirectHome = function() {
+        $(".showlist").bind("click", function() {
             window.location = 'index.html';
-        })
-    }
+        });
+    };
 
     return {
         
