@@ -3,6 +3,7 @@ var Index = function () {
     var createUserState = false;
     var exitRegister = false;
     var EvercamApi = "https://api.evercam.io/v1";
+    var EvercamProxy = "https://evr.cm/";
     var tokenUrl = "http://webapi.camba.tv/v1/auth/token";
     var tokenInfoUrl = "http://astimegoes.by/v1/tokens/";
     var timelapseApiUrl = "http://astimegoes.by/v1/timelapses";
@@ -85,11 +86,11 @@ var Index = function () {
     
     var handleLoginSection = function () {
         /* ENABLE FOR TESTING ONLY */
-        //localStorage.setItem("oAuthTokenType", "bearer");
-        //localStorage.setItem("oAuthToken", "6c4d4f7d71ebc042afd34372cb61396b");
-        //localStorage.setItem("tokenExpiry", "315568999");
-        //localStorage.setItem("timelapseUserId", "azharmalik3")
-        //localStorage.setItem("timelapseUsername", "Azhar Malik");
+        localStorage.setItem("oAuthTokenType", "bearer");
+        localStorage.setItem("oAuthToken", "6ec26b9eb6d125c9e9c8fbcc38d3a676");
+        localStorage.setItem("tokenExpiry", "315568999");
+        localStorage.setItem("timelapseUserId", "shakeelanjum")
+        localStorage.setItem("timelapseUsername", "Shakeel Anjum");
         /* --------- END --------- */
         if (localStorage.getItem("oAuthToken") != null && localStorage.getItem("oAuthToken") != undefined) {
             getMyTimelapse();
@@ -612,7 +613,7 @@ var Index = function () {
             type: 'GET',
             url: timelapseApiUrl + "/users/" + localStorage.getItem("timelapseUserId"),
             dataType: 'json',
-            ContentType: 'application/json; charset=utf-8',
+            contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
             /*beforeSend: function (xhrObj) {
                 xhrObj.setRequestHeader("Authorization", "Basic " + localStorage.getItem("oAuthToken"));
             },*/
@@ -772,7 +773,7 @@ var Index = function () {
             }
         }
 
-        var html = '    <div id="tab' + data.code + '">';
+        var html = '    <div id="tab' + data.code + '">'; 
         html += '        <div class="header-bg">';
         html += '          <div class="row-fluid box-header-padding" data-val="' + data.id + '">';
         html += '              <div id="timelapseTitle' + data.id + '" class="timelapse-labelhd timelapse-label">' + data.title + '&nbsp;<span class="timelapse-camera-name">' + cameraName + '</span></div>';
@@ -799,8 +800,8 @@ var Index = function () {
         html += '                  <table class="tbl-tab" cellpadding="0" cellspacing="0">';
         html += '                      <thead>';
         html += '                          <tr>';
-        html += '                              <th class="tbl-hd1"><a class="tab-a block' + data.id + ' selected-tab" href="javascript:;" data-ref="#embedcode' + data.id + '" data-val="' + data.id + '">Embed Code</a></th>';
-        html += '                              <th class="tbl-hd2"><a class="tab-a block' + data.id + '" href="javascript:;" data-ref="#stats' + data.id + '" data-val="' + data.id + '">Stats</a></th>';
+        html += '                              <th class="tbl-hd2"><a class="tab-a block' + data.id + ' selected-tab" href="javascript:;" data-ref="#stats' + data.id + '" data-val="' + data.id + '">Stats</a></th>';
+        html += '                              <th class="tbl-hd1"><a class="tab-a block' + data.id + '" href="javascript:;" data-ref="#embedcode' + data.id + '" data-val="' + data.id + '">Embed Code</a></th>';
         html += '                              <th class="tbl-hd2"><a class="tab-a block' + data.id + '" href="javascript:;" data-ref="#option' + data.id + '" data-val="' + data.id + '">Options</a></th>';
         html += '                              <th class="tbl-hd3"><a class="tab-a2 block' + data.id + '" href="javascript:;" data-ref="#setting' + data.id + '" data-val="' + data.id + '">Settings&nbsp;&nbsp;<i class="icon-cog"></i></a></th>';
         html += '                          </tr>';
@@ -809,27 +810,28 @@ var Index = function () {
         html += '                           <tr><td colspan="4" height="10px"></td></tr>';
         html += '                               <tr>';
         html += '                                   <td id="cameraCode' + data.id + '" colspan="4">';
-        html += '                                       <div id="embedcode' + data.id + '" class="row-fluid active">';
-        html += '                                           <pre id="code' + data.code + '" class="pre-width">&lt;video class="video-js vjs-default-skin video-bg-width" controls preload="none"';
-        html += ' poster="' + data.jpg_url + '" data-setup="{}"&gt;<br/>';
-        html += '&lt;source src="' + data.mp4_url + '" type="video/mp4" /&gt;<br/>';
-        //html += '&lt;source src="' + data.webm_url + '" type="video/webm" /&gt;<br/>';
-        html += '&lt;/video&gt;</pre>';
-        html += '                                       </div>';
 
-        html += '                                       <div id="stats' + data.id + '" class="row-fluid hide">';
+        html += '                                       <div id="stats' + data.id + '" class="row-fluid active">';
         html += '                                         <div class="timelapse-content-box">';
         html += '                                           <table class="table table-full-width" style="margin-bottom:0px;">';
         html += '                                           <tr><td class="span2">Total Snapshots: </td><td class="span2" id="tdSnapCount' + data.code + '">' + data.snaps_count + '</td><td style="width:25px;text-align:right;" align="right"><img id="imgRef' + data.id + '" style="cursor:pointer;height:27px;" data-val="' + data.code + '" class="refreshStats" src="assets/img/refres-tile.png" alt="Refresh Stats" title="Refresh Stats"></td></tr>';
         html += '                                           <tr><td class="span2">Timelapse Length: </td><td class="span3" colspan="2"  id="tdDuration' + data.code + '">' + data.duration + '</td></tr>';
         html += '                                           <tr><td class="span2">MP4 File Size: </td><td class="span3" colspan="2"  id="tdFileSize' + data.code + '">' + data.file_size + '</td></tr>';
-        html += '                                           <tr><td class="span2">Frames/sec.: </td><td class="span3" colspan="2">' + data.fps + ' fps</td></tr>';
+        html += '                                           <tr><td class="span2">Playback Speed: </td><td class="span3" colspan="2">' + data.fps + ' fps</td></tr>';
         html += '                                           <tr><td class="span2">Resolution: </td><td class="span3" colspan="2"  id="tdResolution' + data.code + '">' + (data.snaps_count == 0 ? '640x480' : data.resolution) + 'px</td></tr>';
         html += '                                           <tr><td class="span2">Created At: </td><td class="span3" colspan="2"  id="tdCreated' + data.code + '">' + (data.created_date) + '</td></tr>'; //data.snaps_count == 0 ? getDate() : 
         html += '                                           <tr><td class="span2">Last Snapshot At: </td><td class="span3" colspan="2"  id="tdLastSnapDate' + data.code + '">' + (data.snaps_count == 0 ? '---' : data.last_snap_date) + '</td></tr>';
         html += '                                           <tr><td class="span2">Camera Timezone: </td><td class="span3" colspan="2"  id="tdTimezone' + data.code + '">' + timezone + '</td></tr>';
         html += '                                           <tr><td class="span2">Timelapse Status: </td><td class="span3" colspan="2"  id="tdStatus' + data.code + '">' + (data.status_tag == null ? (data.status == 1 ? 'Now recording...' : '') : data.status_tag) + '</td></tr></table>';
         html += '                                       </div></div>';
+
+        html += '                                       <div id="embedcode' + data.id + '" class="row-fluid hide">';
+        html += '                                           <pre id="code' + data.code + '" class="pre-width">&lt;video class="video-js vjs-default-skin video-bg-width" controls preload="none"';
+        html += ' poster="' + data.jpg_url + '" data-setup="{}"&gt;<br/>';
+        html += '&lt;source src="' + data.mp4_url + '" type="video/mp4" /&gt;<br/>';
+        //html += '&lt;source src="' + data.webm_url + '" type="video/webm" /&gt;<br/>';
+        html += '&lt;/video&gt;</pre>';
+        html += '                                       </div>';
 
         html += '                                       <div id="setting' + data.id + '" class="row-fluid hide">';
         html += '                                         <div class="timelapse-content-box padding14">';
@@ -1225,7 +1227,9 @@ var Index = function () {
                     isSelect = 'selected="selected"';
                     loadSelectedCamImage(cameraId);
                 }
-                if (cams.cameras[i].external != null && cams.cameras[i].external != undefined)
+                if (cams.cameras[i].is_public && cams.cameras[i].proxy_url != null && cams.cameras[i].proxy_url.jpg != undefined)
+                    $("#ddlCameras0").append('<option class="' + css + '" data-val="' + cams.cameras[i].proxy_url.jpg + '" ' + isSelect + ' value="' + cams.cameras[i].id + '" >' + cams.cameras[i].name + '</option>');
+                else if (!cams.cameras[i].is_public && cams.cameras[i].external != null && cams.cameras[i].external != undefined)
                     $("#ddlCameras0").append('<option class="' + css + '" data-val="' + cams.cameras[i].thumbnail + '" ' + isSelect + ' value="' + cams.cameras[i].id + '" >' + cams.cameras[i].name + '</option>');
             }
             $("#imgCamLoader").hide();
@@ -1387,6 +1391,11 @@ var Index = function () {
         $("#imgPreview").hide();
         $("#imgPreviewLoader").show();
         $("#imgPreviewLoader").attr('src', 'assets/img/ajaxloader.gif');
+        //$("#imgPreview").attr('src', EvercamProxy + cameraId + ".jpg");
+        //$("#imgPreview").show();
+        //$("#imgPreviewLoader").hide();
+        //$("#imgPreviewLoader").attr('src', 'assets/img/cam-img.jpg');
+
         $.ajax({
             type: "GET",
             crossDomain: true,

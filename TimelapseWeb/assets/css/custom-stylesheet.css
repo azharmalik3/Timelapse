@@ -321,7 +321,7 @@ margin-bottom:35px;
     .tbl-tab{width:100%;font-size:14px;color:#2c3e50;}
     .timelapse-label{ font-family:'brandon_grotesquebold'; font-size:18px; color:#2c3e50; }
     .timelapse-camera-name{font-family:'brandon_grotesqueRg'; font-size:13px; color:#2c3e50; }
-    .timelapse-label-status{ font-size:18px; color:#2c3e50; }
+    .timelapse-label-status{ font-size:18px; color:#2c3e50; width:25%; float:right; }
     .commonLinks{
         text-decoration:none;
         color:#2c3e50;

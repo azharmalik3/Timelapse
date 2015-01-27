@@ -87,8 +87,8 @@ class UploadHandler
                 // uploaded images:
                 
                 '' => array(
-                    'max_width' => 100,
-                    'max_height' => 100
+                    'max_width' => 300,
+                    'max_height' => 300
                     //'jpeg_quality' => 95
                 ),
                 
@@ -103,8 +103,8 @@ class UploadHandler
 				// Uncomment the following to create thumbnail sized images:
 				
                 'thumbnail' => array(
-                    'max_width' => 100,
-                    'max_height' => 100
+                    'max_width' => 300,
+                    'max_height' => 300
                 )
             )
         );

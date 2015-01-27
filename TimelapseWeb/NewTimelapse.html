@@ -35,7 +35,41 @@
                         </div>
                     </div>
                     <div class="control-group">
-                        <label class="form-control-label">Frames/sec.</label>
+                        <label class="form-control-label">Date Range</label>
+                        <div class="form-control">
+                            <div class="row-fluid padding-top3">
+                                <label class="radio span4">
+                                    <input id="chkDateRangeAlways0" name="DateRange" type="radio" checked data-val="0" />&nbsp;Always
+                                </label>
+                                <label class="radio span3">
+                                    <input id="chkDateRange0" name="DateRange" type="radio" data-val="0" />&nbsp;Range
+                                </label>
+                            </div>
+                            <div id="divDateRange0" class="row-fluid- hide">
+                                <input type="text" id="txtFromDateRange0" class="span1 small m-wrap white daterange" placeholder="From Date" readonly>&nbsp;
+                                <input type="text" id="txtToDateRange0" class="span1 small m-wrap white daterange" placeholder="To Date" readonly>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="form-control-label">Time Range</label>
+                        <div class="form-control">
+                            <div class="row-fluid padding-top3">
+                                <label class="radio span4">
+                                    <input id="chkTimeRangeAlways0" name="TimeRange" type="radio" checked data-val="0" />&nbsp;Always
+                                </label>
+                                <label class="radio span3">
+                                    <input id="chkTimeRange0" name="TimeRange" type="radio" data-val="0" />&nbsp;Range
+                                </label>
+                            </div>
+                            <div id="divTimeRange0" class="row-fluid- hide">
+                                <input type="text" id="txtFromTimeRange0" class="span1 small m-wrap white timerange" placeholder="From Time" readonly value="00:00">&nbsp;
+                                <input type="text" id="txtToTimeRange0" class="span1 small m-wrap white timerange" placeholder="To Time" readonly value="23:59">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="form-control-label">Playback Speed</label>
                         <div class="form-control">
                             <select id="ddlFrameRate0" class="span11 m-wrap">
                                 <option value="1" selected="selected">1 fps</option>
@@ -56,41 +90,6 @@
                             </select>
                         </div>
                     </div>
-                    <div class="control-group">
-                        <label class="form-control-label">Date Range</label>
-                        <div class="form-control">
-                            <div class="row-fluid padding-top3">
-                                <label class="radio span4">
-                                    <input id="chkDateRangeAlways0" name="DateRange" type="radio" checked data-val="0" />&nbsp;Always
-                                </label>
-                                <label class="radio span3">
-                                    <input id="chkDateRange0" name="DateRange" type="radio" data-val="0" />&nbsp;Range
-                                </label>
-                            </div>
-                            <div id="divDateRange0" class="row-fluid- hide">
-                                <input type="text" id="txtFromDateRange0" class="span1 small m-wrap white daterange" placeholder="From Date" readonly>&nbsp;
-                                <input type="text" id="txtToDateRange0" class="span1 small m-wrap white daterange" placeholder="To Date" readonly>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="control-group">
-                        <label class="form-control-label">Time Range</label>
-                        <div class="form-control">
-                            <div class="row-fluid padding-top3">
-                                <label class="radio span4">
-                                    <input id="chkTimeRangeAlways0" name="TimeRange" type="radio" checked data-val="0" />&nbsp;Always
-                                </label>
-                                <label class="radio span3">
-                                    <input id="chkTimeRange0" name="TimeRange" type="radio" data-val="0" />&nbsp;Range
-                                </label>
-                            </div>
-                            <div id="divTimeRange0" class="row-fluid- hide">
-                                <input type="text" id="txtFromTimeRange0" class="span1 small m-wrap white timerange" placeholder="From Time" readonly value="00:00">&nbsp;
-                                <input type="text" id="txtToTimeRange0" class="span1 small m-wrap white timerange" placeholder="To Time" readonly value="23:59">
-                            </div>
-                        </div>
-                    </div>
                     <div id="divRecording" class="control-group hide">
                         <label class="form-control-label">Recoording</label>
                         <div class="form-control">
@@ -104,7 +103,6 @@
                             </div>
                         </div>
                     </div>
-
                     <div class="control-group">
                         <label class="form-control-label">Watermark Position</label>
                         <div class="form-control">
@@ -116,7 +114,6 @@
                             </select>
                         </div>
                     </div>
-
                     <div class="control-group">
                         <label class="form-control-label">Watermark Logo</label>
                         <div class="form-control">
@@ -216,7 +213,6 @@
                             </div>
                         </div>
                     </div>
-
                     <div class="control-group">
                         <label class="form-control-label"></label>
                         <div class="form-control">
