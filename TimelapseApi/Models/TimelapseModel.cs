@@ -62,6 +62,8 @@ namespace TimelapseApi.Models
         public string modified_date { get; set; }
         /// <example>05/10/2013 00:00:10</example>
         public string created_date { get; set; }
+        /// <example>data:image/jpeg;base64</example>
+        public string poster { get; set; }
 
         public static Timelapse Convert(TimelapseInfoModel model, string evercamId)
         {
@@ -367,5 +369,11 @@ namespace TimelapseApi.Models
         public int watermark_position { get; set; }
         [JsonProperty("watermark_file", NullValueHandling = NullValueHandling.Ignore)]
         public string watermark_file { get; set; }
+    }
+
+    public class DataModel
+    {
+        /// <example>data</example>
+        public string data { get; set; }
     }
 }

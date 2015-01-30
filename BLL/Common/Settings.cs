@@ -81,6 +81,11 @@ namespace BLL.Common
             get { return ConfigurationSettings.AppSettings["TempTimelapse"]; }
         }
 
+        public static string TempLogos
+        {
+            get { return ConfigurationSettings.AppSettings["TempLogos"]; }
+        }
+
         public static string FfprobeExePath
         {
             get { return ConfigurationSettings.AppSettings["FfprobeExePath"]; }

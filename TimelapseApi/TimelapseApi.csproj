@@ -43,6 +43,10 @@
     <Reference Include="DocsByReflection">
       <HintPath>..\..\Timelapse\TimelapseApi\bin\DocsByReflection.dll</HintPath>
     </Reference>
+    <Reference Include="EvercamV1, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\EvercamV1.dll</HintPath>
+    </Reference>
     <Reference Include="log4net">
       <HintPath>..\..\Timelapse\TimelapseApi\bin\log4net.dll</HintPath>
     </Reference>
@@ -286,17 +290,17 @@
     <Content Include="Scripts\jquery-1.10.2.min.map" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\BLL\BLL.csproj">
-      <Project>{7165e44e-62e1-4859-a678-d4332bea5ed3}</Project>
-      <Name>BLL</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <Content Include="fonts\glyphicons-halflings-regular.woff" />
     <Content Include="fonts\glyphicons-halflings-regular.ttf" />
     <Content Include="fonts\glyphicons-halflings-regular.eot" />
     <Content Include="packages.config" />
     <None Include="Project_Readme.html" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\BLL\BLL.csproj">
+      <Project>{7165e44e-62e1-4859-a678-d4332bea5ed3}</Project>
+      <Name>BLL</Name>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

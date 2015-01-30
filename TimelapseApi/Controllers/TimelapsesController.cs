@@ -15,6 +15,7 @@ using System.Web.Security;
 using System.Web.Http.Cors;
 using System.Net.Http.Headers;
 using Newtonsoft.Json;
+using EvercamV1;
 using TimelapseApi.Models;
 using BLL.Dao;
 using BLL.Entities;
@@ -106,6 +107,51 @@ namespace TimelapseApi.Controllers
         }
 
         /// <summary>
+        /// Get given timelapse's placeholder image after retrieving it from Evercam
+        /// and embedding logo in it
+        /// </summary>
+        /// <param name="code">Timelapse Unique Code</param>
+        /// <returns>See sample response data</returns>
+        [Route("v1/timelapses/{code}/placeholder")]
+        [HttpGet]
+        public DataModel GetPlaceholder(string code)
+        {
+            Evercam evercam = new Evercam(Settings.EvercamClientID, Settings.EvercamClientSecret, Settings.EvercamClientUri);
+            Timelapse t = TimelapseDao.Get(code);
+            Camera c = evercam.GetCamera(t.CameraId);
+            string cleanCameraId = BLL.Common.Utils.RemoveSymbols(c.ID);
+            string filePath = Path.Combine(Settings.BucketUrl, Settings.BucketName, cleanCameraId, t.ID.ToString());
+            if (!Directory.Exists(filePath))
+                Directory.CreateDirectory(filePath);
+            if (c.IsPublic)
+            {
+                string image = evercam.GetProxyImage(c.ID);
+                return new DataModel
+                {
+                    data = "data:image/jpeg;base64," + Convert.ToBase64String(
+                        Utils.WatermarkImage(
+                        Convert.FromBase64String(image.Replace("data:image/jpeg;base64,", "")),
+                        filePath + "\\" + t.Code + ".jpg",
+                        t.WatermarkImage,
+                        t.WatermarkPosition))
+                };
+            }
+            else
+            {
+                string image = evercam.GetLiveImage(c.ID).Data;
+                return new DataModel 
+                {
+                    data = "data:image/jpeg;base64," + Convert.ToBase64String(   
+                        Utils.WatermarkImage(
+                        Convert.FromBase64String(image.Replace("data:image/jpeg;base64,", "")),
+                        filePath + "\\" + t.Code + ".jpg",
+                        t.WatermarkImage,
+                        t.WatermarkPosition))
+                };
+            }
+        }
+
+        /// <summary>
         /// Create new timelapse
         /// </summary>
         /// <param name="data">See sample request data</param>
@@ -118,11 +164,50 @@ namespace TimelapseApi.Controllers
             Timelapse t = TimelapseModel.Convert(data, id);
             t.ServerIP = Request.RequestUri.Host;
             t.Status = (int)TimelapseStatus.Processing;
+            t.Code = Utils.GeneratePassCode(10);
 
             int tid = 0;
             if ((tid = TimelapseDao.Insert(t)) == 0)
                 throw new HttpResponseException(HttpStatusCode.BadRequest);
-            return TimelapseModel.Convert(TimelapseDao.Get(tid), Settings.TimelapseAPIUrl + "testimage/" + Settings.TempTimelapse);
+
+            string base64 = "data:image/jpeg;base64,";
+            string upPath = Settings.TimelapseAPIUrl + "testimage/" + Settings.TempTimelapse;
+            if (!string.IsNullOrEmpty(data.watermark_file))
+            {
+                //// create placeholder image at the same time
+                Evercam evercam = new Evercam(Settings.EvercamClientID, Settings.EvercamClientSecret, Settings.EvercamClientUri);
+                Camera c = evercam.GetCamera(t.CameraId);
+                string cleanCameraId = BLL.Common.Utils.RemoveSymbols(c.ID);
+                string filePath = Path.Combine(Settings.BucketUrl, Settings.BucketName, cleanCameraId, tid.ToString());
+                if (!Directory.Exists(filePath))
+                    Directory.CreateDirectory(filePath);
+
+                
+                if (c.IsPublic)
+                {
+                    string image = evercam.GetProxyImage(c.ID);
+                    base64 += Convert.ToBase64String(
+                            Utils.WatermarkImage(
+                            Convert.FromBase64String(image.Replace("data:image/jpeg;base64,", "")),
+                            filePath + "\\" + t.Code + ".jpg",
+                            t.WatermarkImage,
+                            t.WatermarkPosition));
+                    upPath = Settings.SiteServer + Settings.BucketName + "/" + cleanCameraId + "/" + tid.ToString() + "/" + t.Code + ".jpg";
+                }
+                else
+                {
+                    string image = evercam.GetLiveImage(c.ID).Data;
+                    base64 += Convert.ToBase64String(
+                            Utils.WatermarkImage(
+                            Convert.FromBase64String(image.Replace("data:image/jpeg;base64,", "")),
+                            filePath + "\\" + t.Code + ".jpg",
+                            t.WatermarkImage,
+                            t.WatermarkPosition));
+                    upPath = Settings.SiteServer + Settings.BucketName + "/" + cleanCameraId + "/" + tid.ToString() + "/" + t.Code + ".jpg";
+                }
+            }
+
+            return TimelapseModel.Convert(TimelapseDao.Get(tid), base64);
         }
 
         /// <summary>
@@ -139,6 +224,7 @@ namespace TimelapseApi.Controllers
             Timelapse t = TimelapseDao.Get(code);
             if (t.UserId != id)
                 throw new HttpResponseException(HttpStatusCode.Forbidden);
+
             t = TimelapseModel.Convert(data, t.UserId, t.ID, code, t.Status);
 
             if (!TimelapseDao.Update(t))
@@ -186,7 +272,50 @@ namespace TimelapseApi.Controllers
                     TimelapseDao.UpdateStatus(t.Code, TimelapseStatus.Processing, "Processing...", t.TimeZone);
             }
 
-            return TimelapseModel.Convert(TimelapseDao.Get(code));
+            string base64 = "data:image/jpeg;base64,";
+            if (!string.IsNullOrEmpty(data.watermark_file))
+            {
+                //// create placeholder image at the same time
+                Evercam evercam = new Evercam(Settings.EvercamClientID, Settings.EvercamClientSecret, Settings.EvercamClientUri);
+                Camera c = evercam.GetCamera(t.CameraId);
+                string cleanCameraId = BLL.Common.Utils.RemoveSymbols(c.ID);
+                string filePath = Path.Combine(Settings.BucketUrl, Settings.BucketName, cleanCameraId, t.ID.ToString());
+                if (!Directory.Exists(filePath))
+                    Directory.CreateDirectory(filePath);
+                
+                if (c.IsPublic)
+                {
+                    string image = evercam.GetProxyImage(c.ID);
+                    //Utils.WatermarkImage(
+                    //        Convert.FromBase64String(image.Replace("data:image/jpeg;base64,", "")),
+                    //        filePath + "\\" + t.Code + ".jpg",
+                    //        t.WatermarkImage,
+                    //        t.WatermarkPosition);
+                    base64 += Convert.ToBase64String(
+                            Utils.WatermarkImage(
+                            Convert.FromBase64String(image.Replace("data:image/jpeg;base64,", "")),
+                            filePath + "\\" + t.Code + ".jpg",
+                            t.WatermarkImage,
+                            t.WatermarkPosition));
+                }
+                else
+                {
+                    string image = evercam.GetLiveImage(c.ID).Data;
+                    //Utils.WatermarkImage(
+                    //        Convert.FromBase64String(image.Replace("data:image/jpeg;base64,", "")),
+                    //        filePath + "\\" + t.Code + ".jpg",
+                    //        t.WatermarkImage,
+                    //        t.WatermarkPosition);
+                    base64 += Convert.ToBase64String(
+                            Utils.WatermarkImage(
+                            Convert.FromBase64String(image.Replace("data:image/jpeg;base64,", "")),
+                            filePath + "\\" + t.Code + ".jpg",
+                            t.WatermarkImage,
+                            t.WatermarkPosition));
+                }
+            }
+
+            return TimelapseModel.Convert(TimelapseDao.Get(code), base64);
         }
 
         /// <summary>

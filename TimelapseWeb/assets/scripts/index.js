@@ -3,7 +3,6 @@ var Index = function () {
     var createUserState = false;
     var exitRegister = false;
     var EvercamApi = "https://api.evercam.io/v1";
-    var EvercamProxy = "https://evr.cm/";
     var tokenUrl = "http://webapi.camba.tv/v1/auth/token";
     var tokenInfoUrl = "http://astimegoes.by/v1/tokens/";
     var timelapseApiUrl = "http://astimegoes.by/v1/timelapses";
@@ -86,11 +85,11 @@ var Index = function () {
     
     var handleLoginSection = function () {
         /* ENABLE FOR TESTING ONLY */
-        localStorage.setItem("oAuthTokenType", "bearer");
-        localStorage.setItem("oAuthToken", "6ec26b9eb6d125c9e9c8fbcc38d3a676");
-        localStorage.setItem("tokenExpiry", "315568999");
-        localStorage.setItem("timelapseUserId", "shakeelanjum")
-        localStorage.setItem("timelapseUsername", "Shakeel Anjum");
+        //localStorage.setItem("oAuthTokenType", "bearer");
+        //localStorage.setItem("oAuthToken", "6ec26b9eb6d125c9e9c8fbcc38d3a676");
+        //localStorage.setItem("tokenExpiry", "315568999");
+        //localStorage.setItem("timelapseUserId", "shakeelanjum")
+        //localStorage.setItem("timelapseUsername", "Shakeel Anjum");
         /* --------- END --------- */
         if (localStorage.getItem("oAuthToken") != null && localStorage.getItem("oAuthToken") != undefined) {
             getMyTimelapse();
@@ -676,47 +675,7 @@ var Index = function () {
             return "Paused";
     };
 
-    var getVideoPlayer = function(cameraId, mp4, jpg, timelapseId, logoFile) {
-        $.ajax({
-            type: "POST",
-            crossDomain: true,
-            url: EvercamApi + "/cameras/" + cameraId + "/snapshots.json",
-            beforeSend: function(xhrObj) {
-                xhrObj.setRequestHeader("Authorization", localStorage.getItem("oAuthTokenType") + " " + localStorage.getItem("oAuthToken"));
-            },
-            contentType: "application/json; charset=utf-8",
-            dataType: "json",
-            success: function(snapshot) {
-                $.ajax({
-                    type: "GET",
-                    crossDomain: true,
-                    url: EvercamApi + "/cameras/" + cameraId + "/snapshots/" + snapshot.snapshots[0].created_at + ".json",
-                    beforeSend: function(xhrObj) {
-                        xhrObj.setRequestHeader("Authorization", localStorage.getItem("oAuthTokenType") + " " + localStorage.getItem("oAuthToken"));
-                    },
-                    data: { with_data: true },
-                    contentType: "application/json; charset=utf-8",
-                    dataType: "json",
-                    success: function(res) {
-                        var html = '<video data-setup="{}" poster="' + res.snapshots[0].data + '" preload="none" controls="" class="video-js vjs-default-skin video-bg-width" id="video-control-' + timelapseId + '">';
-                        html += '<source type="video/mp4" src="' + mp4 + '"></source>';
-                        html += '</video>';
-
-                        $("#divVideoContainer" + timelapseId).html(html);
-                        console.log($('#video-control-' + timelapseId).width());
-                    },
-                    error: function(xhrc, ajaxOptionsc, thrownErrorc) {
-                        loadDefaultImage(jpg, mp4, timelapseId, logoFile);
-                    }
-                });
-            },
-            error: function(xhrc, ajaxOptionsc, thrownErrorc) {
-                loadDefaultImage(jpg, mp4, timelapseId, logoFile);
-            }
-        });
-    };
-
-    var loadDefaultImage = function(jpg, mp4, timelapseId, logoFile) {
+    var getVideoPlayer = function (cameraId, timelapseCode, mp4, jpg, timelapseId, logoFile) {
         var img = new Image();
         img.onerror = function (evt) {
             var html = '<video data-setup="{}" poster="assets/img/timelapse.jpg" preload="none" controls="" class="video-js vjs-default-skin video-bg-width" id="video-control-' + timelapseId + '">';
@@ -790,7 +749,7 @@ var Index = function () {
         html += '              <div id="divVideoContainer' + data.id + '" class="span6">';
         //html += '                  <iframe style="width:100%; border:0;height:360px;" src="loadvideo.html?id=' + data.camera_id + '&mp4=' + data.mp4_url + '&webm=' + data.webm_url + '&jpg=' + data.jpg_url + '" frameborder="0" allowfullscreen></iframe>';
 
-        getVideoPlayer(data.camera_id, data.mp4_url, data.jpg_url, data.id, data.watermark_file);
+        getVideoPlayer(data.camera_id, data.code, data.mp4_url, data.jpg_url, data.id, data.watermark_file);
         html += '                  <video data-setup="{}" preload="none" controls="" class="video-js vjs-default-skin video-bg-width" id="vde4b3u05e9y">';
         html += '                   <source type="video/mp4" src="' + data.mp4_url + '"></source>';
         html += '                  </video>';
@@ -1391,10 +1350,6 @@ var Index = function () {
         $("#imgPreview").hide();
         $("#imgPreviewLoader").show();
         $("#imgPreviewLoader").attr('src', 'assets/img/ajaxloader.gif');
-        //$("#imgPreview").attr('src', EvercamProxy + cameraId + ".jpg");
-        //$("#imgPreview").show();
-        //$("#imgPreviewLoader").hide();
-        //$("#imgPreviewLoader").attr('src', 'assets/img/cam-img.jpg');
 
         $.ajax({
             type: "GET",

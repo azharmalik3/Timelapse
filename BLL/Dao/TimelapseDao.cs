@@ -263,7 +263,7 @@ namespace BLL.Dao
             {
                 var p1 = new SqlParameter("@CameraId", timelapse.CameraId);
                 var p2 = new SqlParameter("@UserId", timelapse.UserId);
-                var p3 = new SqlParameter("@Code", Utils.GeneratePassCode(10));
+                var p3 = new SqlParameter("@Code", timelapse.Code);
                 var p4 = new SqlParameter("@Title", timelapse.Title);
                 var p5 = new SqlParameter("@Status", timelapse.Status);
                 var p6 = new SqlParameter("@Privacy", timelapse.Privacy);

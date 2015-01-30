@@ -2,6 +2,9 @@
 using System.Diagnostics;
 using System.Collections.Generic;
 using System.Linq;
+using System.Drawing;
+using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
 using System.Text;
 using System.IO;
 using System.Net;
@@ -16,11 +19,135 @@ namespace BLL.Common
     {
         public static string SiteServer = ConfigurationSettings.AppSettings["SiteServer"];
         public static string WatermarkPrefix = ConfigurationSettings.AppSettings["WatermarkPrefix"];
+        public static int WatermarkMargin = int.Parse(ConfigurationSettings.AppSettings["WatermarkMargin"]);
 
         public static DateTime SQLMinDate = new DateTime(1900, 1, 1, 12, 0, 0);     // changed from 1753    to fix utc
         public static DateTime SQLMaxDate = new DateTime(8888, 12, 31, 23, 59, 59); // changed from 9999    conversion errors
         private const string Dictionary = "abcdefghiklmonpqrstuxzwy";
         private const string Dictionary2 = "abcdefghiklmonpqrstuxzwy1234567890";
+
+        public static byte[] WatermarkImage(string input, string output, string logofile, int logoposition)
+        {
+            byte[] bytes = new byte[] { };
+            try
+            {
+                Image image = Image.FromFile(input);
+                Graphics g = System.Drawing.Graphics.FromImage(image);
+                MemoryStream stream = new MemoryStream();
+
+                if (!string.IsNullOrEmpty(logofile))
+                    AddLogo(g, logofile, logoposition, image.Width, image.Height);
+
+                using (MemoryStream ms = new MemoryStream())
+                {
+                    image.Save(ms, ImageFormat.Jpeg);
+                    bytes = ms.ToArray();
+                }
+
+                g.Dispose();
+                image.Dispose();
+                stream.Close();
+                stream.Dispose();
+
+                if (!string.IsNullOrEmpty(output))
+                {
+                    Storage.SaveFile(output, bytes);
+                    FileLog("Utils.WatermarkImage: File Saved: " + output);
+                }
+                return bytes;
+            }
+            catch (Exception x)
+            {
+                FileLog("Utils.WatermarkImage: " + x.Message + Environment.NewLine + x.InnerException.ToString());
+                return bytes;
+            }
+        }
+
+        public static byte[] WatermarkImage(byte[] imagedata, string output, string logofile, int logoposition)
+        {
+            byte[] bytes = new byte[] { };
+            try
+            {
+                MemoryStream stream = new MemoryStream(imagedata);
+                Image image = System.Drawing.Image.FromStream(stream);
+                Graphics g = System.Drawing.Graphics.FromImage(image);
+
+                if (!string.IsNullOrEmpty(logofile))
+                    AddLogo(g, logofile, logoposition, image.Width, image.Height);
+
+                using (MemoryStream ms = new MemoryStream())
+                {
+                    image.Save(ms, ImageFormat.Jpeg);
+                    bytes = ms.ToArray();
+                }
+
+                g.Dispose();
+                image.Dispose();
+                stream.Close();
+                stream.Dispose();
+
+                if (!string.IsNullOrEmpty(output))
+                {
+                    Storage.SaveFile(output, bytes);
+                }
+
+                return bytes;
+            }
+            catch (Exception x)
+            {
+                FileLog("Utils.WatermarkImage: " + x.Message + Environment.NewLine + x.InnerException.ToString());
+                return bytes;
+            }
+        }
+
+        private static void AddLogo(Graphics g, string watermark, int position, int width, int height)
+        {
+            try
+            {
+                //// ideally should not download it, instead get from disk location
+                //// but that was erroring 'out of memory' due to corrupt image format
+                string nPath = Path.Combine(Settings.TempLogos, Path.GetFileName(watermark));
+                Storage.DownloadFile(watermark, nPath);
+
+                string path = WebUtility.UrlDecode(watermark);
+                path = path.Replace(Utils.SiteServer, Utils.WatermarkPrefix).Replace(@"/", @"\\");
+                if (!File.Exists(path))
+                {
+                    FileLog("Utils.AddLogo: File Not Found: " + nPath);
+                    return;
+                }
+                
+                using (Image logo = Image.FromFile(nPath))
+                {
+                    Bitmap TransparentLogo = new Bitmap(logo.Width, logo.Height);
+                    Graphics TGraphics = Graphics.FromImage(TransparentLogo);
+                    ColorMatrix ColorMatrix = new ColorMatrix();
+                    ColorMatrix.Matrix33 = 0.50F;           // transparency
+                    ImageAttributes ImgAttributes = new ImageAttributes();
+                    ImgAttributes.SetColorMatrix(ColorMatrix, ColorMatrixFlag.Default, ColorAdjustType.Bitmap);
+                    TGraphics.DrawImage(logo, new Rectangle(0, 0, TransparentLogo.Width, TransparentLogo.Height), 0, 0, TransparentLogo.Width, TransparentLogo.Height, GraphicsUnit.Pixel, ImgAttributes);
+                    TGraphics.Dispose();
+
+                    switch (position)
+                    {
+                        case (int)WatermarkPosition.TopLeft:
+                            g.DrawImage(TransparentLogo, Utils.WatermarkMargin, Utils.WatermarkMargin);
+                            break;
+                        case (int)WatermarkPosition.TopRight:
+                            g.DrawImage(TransparentLogo, width - (TransparentLogo.Width + Utils.WatermarkMargin), Utils.WatermarkMargin);
+                            break;
+                        case (int)WatermarkPosition.BottomLeft:
+                            g.DrawImage(TransparentLogo, Utils.WatermarkMargin, height - (TransparentLogo.Height + Utils.WatermarkMargin));
+                            break;
+                        case (int)WatermarkPosition.BottomRight:
+                            g.DrawImage(TransparentLogo, width - (TransparentLogo.Width + Utils.WatermarkMargin), height - (TransparentLogo.Height + Utils.WatermarkMargin));
+                            break;
+                    }
+                    FileLog("Logo added: " + nPath);
+                }
+            }
+            catch (Exception x) { FileLog("Utils.AddLogo: " + x.Message + Environment.NewLine + x.ToString()); }
+        }
 
         public static string RemoveSymbols(string str)
         {
@@ -231,7 +358,7 @@ namespace BLL.Common
             catch { }
         }
 
-        public static void TimelapseLog(Timelapse timelapse, string message)
+        public static void TimelapseLog(int timelapseId, string message)
         {
             try
             {
@@ -241,7 +368,7 @@ namespace BLL.Common
                 if (!Directory.Exists(logPath))
                     Directory.CreateDirectory(logPath);
 
-                string logFolder = Path.Combine(logPath, timelapse.ID.ToString());
+                string logFolder = Path.Combine(logPath, timelapseId.ToString());
 
                 if (!Directory.Exists(logFolder))
                     Directory.CreateDirectory(logFolder);
@@ -259,28 +386,19 @@ namespace BLL.Common
             catch { }
         }
 
+        public static void TimelapseLog(Timelapse timelapse, string message)
+        {
+            TimelapseLog(timelapse.ID, message);
+        }
+
         public static void TimelapseLog(Timelapse timelapse, Exception x)
         {
             TimelapseLog(timelapse, x.ToString());
-            try
-            {
-                //// temporarily loggin in file as well
-                //FileLog("Timelapse#" + timelapse.ID + ": " + x.ToString());
-                //LogDao.Insert(new Log() { TimelapseId = timelapse.ID, CameraId = timelapse.CameraId, UserId = timelapse.UserId, Type = (int)TimelapseLogType.RecorderError, Message = x.Message, Details = x.InnerException.ToString() });
-            }
-            catch { }
         }
 
         public static void TimelapseLog(Timelapse timelapse, string message, Exception x)
         {
             TimelapseLog(timelapse, message + Environment.NewLine + x.ToString());
-            try
-            {
-                //// temporarily loggin in file as well
-                //FileLog("Timelapse#" + timelapse.ID + ": " + message + Environment.NewLine + x.ToString());
-                //LogDao.Insert(new Log() { TimelapseId = timelapse.ID, CameraId = timelapse.CameraId, UserId = timelapse.UserId, Type = (int)TimelapseLogType.RecorderError, Message = message, Details = x.InnerException.ToString() });
-            }
-            catch { }
         }
 
         public static SnapshotData DoDownload(string url, string username, string password, bool useCredentials)

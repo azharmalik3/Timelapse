@@ -32,14 +32,15 @@ namespace Timelapser
         {
             AppDomain.CurrentDomain.UnhandledException += CurrentDomainUnhandledException;
             int tId = Convert.ToInt32(args[0]);
-            //int tId = 220;
+            //// testing any timelapse
+            //int tId = 273;
             Evercam = new Evercam(Settings.EvercamClientID, Settings.EvercamClientSecret, Settings.EvercamClientUri);
             Timelapse timelapse = new Timelapse();
             try
             {
                 tl = timelapse = TimelapseDao.Get(tId);
-
                 string cleanCameraId = BLL.Common.Utils.RemoveSymbols(timelapse.CameraId);
+
                 if (timelapse.ID == 0)
                 {
                     TimelapseDao.UpdateStatus(timelapse.Code, TimelapseStatus.Failed, "Timelapse details not found", timelapse.TimeZone);
