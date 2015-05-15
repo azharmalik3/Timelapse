@@ -1162,7 +1162,7 @@ var Index = function () {
             beforeSend: function(xhrObj) {
                 xhrObj.setRequestHeader("Authorization", localStorage.getItem("oAuthTokenType") + " " + localStorage.getItem("oAuthToken"));
             },
-            data: { include_shared: true, thumbnail: true },
+            data: { include_shared: true, thumbnail: false },
             contentType: "application/json; charset=utf-8",
             dataType: "json",
             success: function(res) {
@@ -1186,10 +1186,8 @@ var Index = function () {
                     isSelect = 'selected="selected"';
                     loadSelectedCamImage(cameraId);
                 }
-                if (cams.cameras[i].is_public && cams.cameras[i].proxy_url != null && cams.cameras[i].proxy_url.jpg != undefined)
-                    $("#ddlCameras0").append('<option class="' + css + '" data-val="' + cams.cameras[i].proxy_url.jpg + '" ' + isSelect + ' value="' + cams.cameras[i].id + '" >' + cams.cameras[i].name + '</option>');
-                else if (!cams.cameras[i].is_public && cams.cameras[i].external != null && cams.cameras[i].external != undefined)
-                    $("#ddlCameras0").append('<option class="' + css + '" data-val="' + cams.cameras[i].thumbnail + '" ' + isSelect + ' value="' + cams.cameras[i].id + '" >' + cams.cameras[i].name + '</option>');
+                if (cams.cameras[i].thumbnail_url != null && cams.cameras[i].thumbnail_url != undefined)
+                    $("#ddlCameras0").append('<option class="' + css + '" data-val="' + cams.cameras[i].thumbnail_url + '" ' + isSelect + ' value="' + cams.cameras[i].id + '" >' + cams.cameras[i].name + '</option>');
             }
             $("#imgCamLoader").hide();
             $("#ddlCameras0").select2({
