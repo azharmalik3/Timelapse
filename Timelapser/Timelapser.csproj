@@ -37,9 +37,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="EvercamV1, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="EvercamV2, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>bin\Debug\EvercamV1.dll</HintPath>
+      <HintPath>bin\Debug\EvercamV2.dll</HintPath>
     </Reference>
     <Reference Include="log4net, Version=1.2.9.0, Culture=neutral">
       <SpecificVersion>False</SpecificVersion>

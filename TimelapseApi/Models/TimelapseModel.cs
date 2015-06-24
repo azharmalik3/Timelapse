@@ -64,6 +64,8 @@ namespace TimelapseApi.Models
         public string created_date { get; set; }
         /// <example>data:image/jpeg;base64</example>
         public string poster { get; set; }
+        /// <example>1a2b3c4d5e6f7a8b9c0d</example>
+        public string access_token { get; set; }
 
         public static Timelapse Convert(TimelapseInfoModel model, string evercamId)
         {
@@ -204,6 +206,7 @@ namespace TimelapseApi.Models
             timelapse.FPS = model.fps;
             timelapse.WatermarkImage = model.watermark_file;
             timelapse.WatermarkPosition = model.watermark_position;
+            timelapse.OauthToken = model.access_token;
 
             return timelapse;
         }
@@ -243,6 +246,7 @@ namespace TimelapseApi.Models
             model.fps = timelapse.FPS;
             model.watermark_file = timelapse.WatermarkImage;
             model.watermark_position = (int)timelapse.WatermarkPosition;
+            model.access_token = timelapse.OauthToken;
 
             return model;
         }
@@ -286,6 +290,7 @@ namespace TimelapseApi.Models
                 model.fps = timelapse.FPS;
                 model.watermark_file = timelapse.WatermarkImage;
                 model.watermark_position = (int)timelapse.WatermarkPosition;
+                model.access_token = timelapse.OauthToken;
 
                 list.Add(model);
             }
@@ -301,7 +306,8 @@ namespace TimelapseApi.Models
             model.user_id = timelapse.UserId;
             model.code = timelapse.Code;
             model.title = timelapse.Title;
-            model.jpg_url = tempImage;
+            model.jpg_url = Common.Utility.GetTimelapseResourceUrl(timelapse) + timelapse.Code + ".jpg";
+            //model.jpg_url = tempImage;
             model.status_tag = timelapse.StatusTag;
             model.mp4_url = Common.Utility.GetTimelapseResourceUrl(timelapse) + timelapse.Code + ".mp4";
             model.status = timelapse.Status;
@@ -327,6 +333,7 @@ namespace TimelapseApi.Models
             model.fps = timelapse.FPS;
             model.watermark_file = timelapse.WatermarkImage;
             model.watermark_position = (int)timelapse.WatermarkPosition;
+            model.access_token = timelapse.OauthToken;
 
             return model;
         }

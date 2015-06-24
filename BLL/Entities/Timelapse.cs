@@ -36,6 +36,7 @@ namespace BLL.Entities
         public long FileSize { get; set; }
         public string Duration { get; set; }
         public string Resolution { get; set; }
+        public bool MaxResolution { get; set; }
         public string WatermarkImage { get; set; }
         public int WatermarkPosition { get; set; }
     }

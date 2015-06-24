@@ -10,6 +10,8 @@ namespace TimelapseAppService
 {
     static class Program
     {
+        public static DateTime LastDeletion = DateTime.UtcNow.AddHours(-7);
+
         /// <summary>
         /// The main entry point for the application.
         /// </summary>

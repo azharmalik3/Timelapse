@@ -57,7 +57,7 @@ namespace Shutdown
                 start.CreateNoWindow = true;
                 process.StartInfo = start;
                 process.Start();
-                process.WaitForExit(500);
+                //process.WaitForExit(500);
             }
             catch
             {

@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.21005.1
+VisualStudioVersion = 12.0.30501.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "TimelapseWeb", "http://localhost:60996", "{358802F5-B968-4BB1-A834-B095A93CB0D0}"
 	ProjectSection(WebsiteProperties) = preProject
@@ -46,6 +46,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TimelapseAppService", "Time
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestBed", "TestBed\TestBed.csproj", "{825BC37B-EC97-4313-8416-64BAAEE1081E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Deletion", "Deletion\Deletion.csproj", "{67A27A1F-97C5-4B24-A6C2-0CB512E92F2D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TimelapseMaker", "TimelapseMaker\TimelapseMaker.csproj", "{4F4D21B8-1728-41EB-9DE0-4D0CA3DC428F}"
+EndProject
 Global
 	GlobalSection(SubversionScc) = preSolution
 		Svn-Managed = True
@@ -84,6 +88,14 @@ Global
 		{825BC37B-EC97-4313-8416-64BAAEE1081E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{825BC37B-EC97-4313-8416-64BAAEE1081E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{825BC37B-EC97-4313-8416-64BAAEE1081E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{67A27A1F-97C5-4B24-A6C2-0CB512E92F2D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{67A27A1F-97C5-4B24-A6C2-0CB512E92F2D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{67A27A1F-97C5-4B24-A6C2-0CB512E92F2D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{67A27A1F-97C5-4B24-A6C2-0CB512E92F2D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4F4D21B8-1728-41EB-9DE0-4D0CA3DC428F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4F4D21B8-1728-41EB-9DE0-4D0CA3DC428F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4F4D21B8-1728-41EB-9DE0-4D0CA3DC428F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4F4D21B8-1728-41EB-9DE0-4D0CA3DC428F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

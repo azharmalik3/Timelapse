@@ -1,12 +1,7 @@
 var Index = function () {
-    var isLogin = false;
-    var createUserState = false;
-    var exitRegister = false;
     var EvercamApi = "https://api.evercam.io/v1";
-    var tokenUrl = "http://webapi.camba.tv/v1/auth/token";
-    var tokenInfoUrl = "http://astimegoes.by/v1/tokens/";
-    var timelapseApiUrl = "http://astimegoes.by/v1/timelapses";
-    var utilsApi = "http://astimegoes.by/v1";
+    var timelapseApiUrl = "http://timelapse.evercam.io/v1/timelapses";
+    var utilsApi = "http://timelapse.evercam.io/v1";
     var ApiAction = 'POST';
     var apiContentType = 'application/json; charset=utf-8';
     var loopCount = 1;
@@ -668,11 +663,11 @@ var Index = function () {
         else if (status == 3)
             return "Scheduled";
         else if (status == 4)
-            return "Expired";
+            return "Stopped";
         else if (status == 5)
             return "Camera Not Found";
         else if (status == 6)
-            return "Paused";
+            return "Expired";
     };
 
     var getVideoPlayer = function (cameraId, timelapseCode, mp4, jpg, timelapseId, logoFile) {
@@ -1158,11 +1153,11 @@ var Index = function () {
         $.ajax({
             type: "GET",
             crossDomain: true,
-            url: EvercamApi + "/users/" + localStorage.getItem("timelapseUserId") + "/cameras",
+            url: EvercamApi + "/cameras.json",
             beforeSend: function(xhrObj) {
                 xhrObj.setRequestHeader("Authorization", localStorage.getItem("oAuthTokenType") + " " + localStorage.getItem("oAuthToken"));
             },
-            data: { include_shared: true, thumbnail: false },
+            data: { user_id: localStorage.getItem("timelapseUserId") },
             contentType: "application/json; charset=utf-8",
             dataType: "json",
             success: function(res) {
@@ -1181,13 +1176,17 @@ var Index = function () {
                 var css = 'onlinec';
                 if (!cams.cameras[i].is_online)
                     css = 'offlinec';
-                var isSelect = '';
-                if (cameraId == cams.cameras[i].id) {
-                    isSelect = 'selected="selected"';
-                    loadSelectedCamImage(cameraId);
+                if (cams.cameras[i].rights.indexOf("snapshot") > -1) {
+                    var isSelect = '';
+                    if (cameraId == cams.cameras[i].id) {
+                        isSelect = 'selected="selected"';
+                        loadSelectedCamImage(cameraId);
+                    }
+                    if (cams.cameras[i].thumbnail_url != null && cams.cameras[i].thumbnail_url != undefined)
+                        $("#ddlCameras0").append('<option class="' + css + '" data-val="' + cams.cameras[i].thumbnail_url + '" ' + isSelect + ' value="' + cams.cameras[i].id + '" >' + cams.cameras[i].name + '</option>');
                 }
-                if (cams.cameras[i].thumbnail_url != null && cams.cameras[i].thumbnail_url != undefined)
-                    $("#ddlCameras0").append('<option class="' + css + '" data-val="' + cams.cameras[i].thumbnail_url + '" ' + isSelect + ' value="' + cams.cameras[i].id + '" >' + cams.cameras[i].name + '</option>');
+                else
+                    console.log("Insufficient rights: " + cams.cameras[i].id);
             }
             $("#imgCamLoader").hide();
             $("#ddlCameras0").select2({
@@ -1352,7 +1351,7 @@ var Index = function () {
         $.ajax({
             type: "GET",
             crossDomain: true,
-            url: EvercamApi + "/cameras/" + cameraId + "/live.json",
+            url: EvercamApi + "/cameras/" + cameraId + "/recordings/snapshots/latest.json",
             beforeSend: function (xhrObj) {
                 xhrObj.setRequestHeader("Authorization", localStorage.getItem("oAuthTokenType") + " " + localStorage.getItem("oAuthToken"));
             },
@@ -1360,10 +1359,10 @@ var Index = function () {
             contentType: "application/json; charset=utf-8",
             dataType: "json",
             success: function (res) {
-                if (res.data == null || res.data == undefined) {
+                if (res.snapshots[0].data == null || res.snapshots[0].data == undefined) {
                     $("#imgPreviewLoader").attr('src', 'assets/img/cam-img.jpg');
                 } else {
-                    $("#imgPreview").attr('src', res.data);
+                    $("#imgPreview").attr('src', res.snapshots[0].data);
                     $("#imgPreview").show();
                     $("#imgPreviewLoader").hide();
                     $("#imgPreviewLoader").attr('src', 'assets/img/cam-img.jpg');
@@ -1386,13 +1385,13 @@ var Index = function () {
         init: function () {
             handleFileupload();
             redirectHome();
-            getUserLocalIp();
             handleLoginSection();
             handleTimelapsesCollapse();
             handleNewTimelapse();
             handleLogout();
             handleMyTimelapse();
             handleFancyBox();
+            //getUserLocalIp();
         }
 
     };

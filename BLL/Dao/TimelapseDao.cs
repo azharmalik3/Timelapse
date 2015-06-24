@@ -74,13 +74,45 @@ namespace BLL.Dao
             }
         }
 
+        public static Timelapse GetExists(int id)
+        {
+            var timelapse = new Timelapse();
+            try
+            {
+                const string sql = "Select * FROM Timelapses WHERE Id=@Id ORDER BY CreatedDT DESC";
+                var p1 = new SqlParameter("@Id", id);
+                var cmd = new SqlCommand { CommandText = sql, CommandType = CommandType.Text };
+                cmd.Parameters.Add(p1);
+                cmd.Connection = Connection.DbConnection;
+                Connection.OpenConnection();
+                var dr = GetListFromDataReader(cmd.ExecuteReader());
+
+                if (dr.Count > 0) timelapse = dr.FirstOrDefault();
+
+                Connection.CloseConnection();
+                return timelapse;
+            }
+            catch (Exception ex)
+            {
+                if (Connection.DbConnection.State == ConnectionState.Closed)
+                    Utils.FileLog("TimelapseDao Get(int id) " + ex.Message);
+                else
+                    Utils.FileLog(string.Format("TimelapseDao Get(int id) Id={0}<br />{1}", id, ex.Message));
+                return timelapse;
+            }
+            finally
+            {
+                Connection.CloseConnection();
+            }
+        }
+
         public static List<Timelapse> GetList(TimelapsePrivacy? privacy, TimelapseStatus? status)
         {
             try
             {
                 string s = (status.HasValue ? " AND Status = " + ((int)status.Value) : "");
                 string p = (privacy.HasValue ? " AND Privacy = " + ((int)privacy.Value) : "");
-                string sql = "Select * FROM Timelapses WHERE IsDeleted=0" + s + p + " ORDER BY CreatedDT DESC";
+                string sql = "Select * FROM Timelapses WHERE IsDeleted=0" + s + p + " ";
                 var cmd = new SqlCommand { CommandText = sql, CommandType = CommandType.Text };
                 cmd.Connection = Connection.DbConnection;
                 Connection.OpenConnection();
@@ -244,6 +276,32 @@ namespace BLL.Dao
                     Utils.FileLog("TimelapseDao GetListByType(bool isRecording) " + ex.Message);
                 else
                     Utils.FileLog(string.Format("TimelapseDao GetListByType(bool isRecording) isRecording={0}<br />{1}", isRecording, ex.Message));
+                return new List<Timelapse>();
+            }
+            finally
+            {
+                Connection.CloseConnection();
+            }
+        }
+
+        public static List<Timelapse> GetListForDeletion(string deleted, string status)
+        {
+            try
+            {
+                string sql = "Select * FROM Timelapses WHERE " + deleted + " AND " + status + " ORDER BY CreatedDT DESC";
+                var cmd = new SqlCommand { CommandText = sql, CommandType = CommandType.Text };
+                cmd.Connection = Connection.DbConnection;
+                Connection.OpenConnection();
+                var dr = GetListFromDataReader(cmd.ExecuteReader());
+                Connection.CloseConnection();
+                return dr;
+            }
+            catch (Exception ex)
+            {
+                if (Connection.DbConnection.State == ConnectionState.Closed)
+                    Utils.FileLog("TimelapseDao GetList() " + ex.Message);
+                else
+                    Utils.FileLog(string.Format("TimelapseDao GetList() <br />{1}", ex.Message));
                 return new List<Timelapse>();
             }
             finally
@@ -426,10 +484,11 @@ namespace BLL.Dao
         public static bool Update(Timelapse timelapse)
         {
             string query = @"UPDATE [dbo].[Timelapses] " +
-                           "SET [Title]=@Title, [Privacy]=@Privacy, [SnapsInterval]=@SnapsInterval, [FromDT]=@FromDT, [ToDT]=@ToDT,[DateAlways]=@DateAlways,[TimeAlways]=@TimeAlways,[TzId]=@TzId,[Timezone]=@Timezone, [EnableMD]=@EnableMD, [MDThreshold]=@MDThreshold, [ExcludeDark]=@ExcludeDark, [DarkThreshold]=@DarkThreshold, [IsRecording]=@IsRecording, [FPS]=@FPS, [WatermarkImage]=@WatermarkImage, [WatermarkPosition]=@WatermarkPosition " +
+                           "SET [OauthToken]=@OauthToken,[Title]=@Title, [Privacy]=@Privacy, [SnapsInterval]=@SnapsInterval, [FromDT]=@FromDT, [ToDT]=@ToDT,[DateAlways]=@DateAlways,[TimeAlways]=@TimeAlways,[TzId]=@TzId,[Timezone]=@Timezone, [EnableMD]=@EnableMD, [MDThreshold]=@MDThreshold, [ExcludeDark]=@ExcludeDark, [DarkThreshold]=@DarkThreshold, [IsRecording]=@IsRecording, [FPS]=@FPS, [WatermarkImage]=@WatermarkImage, [WatermarkPosition]=@WatermarkPosition " +
                            "WHERE (Code = '" + timelapse.Code + "')";
             try
             {
+                var p3 = new SqlParameter("@OauthToken", timelapse.OauthToken);
                 var p4 = new SqlParameter("@Title", timelapse.Title);
                 var p6 = new SqlParameter("@Privacy", timelapse.Privacy);
                 var p7 = new SqlParameter("@FromDT", (timelapse.FromDT == null) ? Utils.SQLMinDate : timelapse.FromDT);
@@ -448,7 +507,7 @@ namespace BLL.Dao
                 var p20 = new SqlParameter("@WatermarkImage", (timelapse.WatermarkImage.Equals("-") ? "" : timelapse.WatermarkImage));
                 var p21 = new SqlParameter("@WatermarkPosition", timelapse.WatermarkPosition);
 
-                var list = new[] { p4, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, p20, p21 };
+                var list = new[] { p3, p4, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, p20, p21 };
                 var cmd = new SqlCommand { CommandText = query, CommandType = CommandType.Text };
                 cmd.Parameters.AddRange(list);
                 Connection.OpenConnection();
@@ -655,6 +714,31 @@ namespace BLL.Dao
             { Connection.CloseConnection(); }
         }
 
+        public static void UpdateUserToken(string user, string access_token)
+        {
+            string query = @"UPDATE [dbo].[Timelapses] " +
+                           "SET [OauthToken] = (@Token) " +
+                           "WHERE (UserId = '" + user + "')";
+            try
+            {
+                var p1 = new SqlParameter("@OauthToken", access_token);
+
+                var cmd = new SqlCommand { CommandText = query, CommandType = CommandType.Text };
+                cmd.Parameters.Add(p1);
+                Connection.OpenConnection();
+                cmd.Connection = Connection.DbConnection;
+                long result = (long)cmd.ExecuteScalar();
+                Connection.CloseConnection();
+                cmd.Dispose();
+            }
+            catch (Exception ex)
+            {
+                Utils.FileLog("TimelapseDao UpdateUserToken(string user, string access_token) " + ex.Message);
+            }
+            finally
+            { Connection.CloseConnection(); }
+        }
+
         public static bool Delete(int id)
         {
             string query = @"UPDATE [dbo].[Timelapses] " +
@@ -743,6 +827,8 @@ namespace BLL.Dao
                     timelapse.Duration = dr["Duration"].ToString();
                 if (!dr.IsDBNull(dr.GetOrdinal("Resolution")))
                     timelapse.Resolution = dr["Resolution"].ToString();
+                if (!dr.IsDBNull(dr.GetOrdinal("MaxResolution")))
+                    timelapse.MaxResolution = dr.GetBoolean(dr.GetOrdinal("MaxResolution"));
                 if (!dr.IsDBNull(dr.GetOrdinal("ServerIP")))
                     timelapse.ServerIP = dr["ServerIP"].ToString();
                 if (!dr.IsDBNull(dr.GetOrdinal("TzId")))

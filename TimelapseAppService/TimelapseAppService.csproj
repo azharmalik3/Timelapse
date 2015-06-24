@@ -35,9 +35,9 @@
     <StartupObject>TimelapseAppService.Program</StartupObject>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="EvercamV1, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="EvercamV2, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>bin\Debug\EvercamV1.dll</HintPath>
+      <HintPath>bin\Debug\EvercamV2.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>

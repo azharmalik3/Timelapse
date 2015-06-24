@@ -26,9 +26,9 @@ namespace BLL.Common
         Processing = 1,
         Failed = 2,
         Scheduled = 3,
-        Expired = 4,
+        Stopped = 4,
         NotFound = 5,
-        Paused = 6
+        Expired = 6
     }
 
     public enum TimelapseLogType

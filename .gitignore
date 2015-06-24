@@ -39,6 +39,7 @@ local.properties
 # User-specific files
 *.suo
 *.user
+*.config
 *.sln.docstates
 
 # Build results
@@ -213,3 +214,5 @@ pip-log.txt
 
 #Mr Developer
 .mr.developer.cfg
+/ffmpeg
+/Timelapser/*.txt

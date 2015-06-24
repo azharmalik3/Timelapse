@@ -2,6 +2,8 @@
 using System.Diagnostics;
 using System.Collections.Generic;
 using System.Linq;
+using System.Data;
+using System.Data.SqlClient;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
@@ -17,14 +19,269 @@ namespace BLL.Common
 {
     public class Utils
     {
-        public static string SiteServer = ConfigurationSettings.AppSettings["SiteServer"];
-        public static string WatermarkPrefix = ConfigurationSettings.AppSettings["WatermarkPrefix"];
-        public static int WatermarkMargin = int.Parse(ConfigurationSettings.AppSettings["WatermarkMargin"]);
+        public static string SiteServer = Settings.SiteServer;
+        public static string WatermarkPrefix = Settings.WatermarkPrefix;
+        public static int WatermarkMargin = Settings.WatermarkMargin;
 
-        public static DateTime SQLMinDate = new DateTime(1900, 1, 1, 12, 0, 0);     // changed from 1753    to fix utc
-        public static DateTime SQLMaxDate = new DateTime(8888, 12, 31, 23, 59, 59); // changed from 9999    conversion errors
+        public static DateTime SQLMinDate = new DateTime(1900, 1, 1, 12, 0, 0);         // changed from 1753    to fix utc
+        public static DateTime SQLMaxDate = new DateTime(8888, 12, 31, 23, 59, 59);     // changed from 9999    conversion errors
         private const string Dictionary = "abcdefghiklmonpqrstuxzwy";
         private const string Dictionary2 = "abcdefghiklmonpqrstuxzwy1234567890";
+
+        public static void CopyTimelapsesToAzure()
+        {
+            SqlConnection AzureConnection = new SqlConnection(ConfigurationSettings.AppSettings["ConnectionStringAzure"]);
+            AzureConnection.Open();
+            List<Timelapse> timelapses = TimelapseDao.GetList(null, null);
+            foreach (Timelapse t in timelapses)
+            {
+                string query = @"SET IDENTITY_INSERT Timelapses ON INSERT INTO [dbo].[Timelapses] " +
+                               "([Id],[UserId],[CameraId],[OauthToken],[Code],[Title],[Status],[Privacy],[FromDT],[ToDT],[DateAlways],[TimeAlways],[ServerIP],[TzId],[TimeZone],[SnapsInterval],[ModifiedDT],[EnableMD],[MDThreshold],[ExcludeDark],[DarkThreshold],[FPS],[IsRecording],[IsDeleted],[CreatedDT],[WatermarkImage],[WatermarkPosition]) " +
+                               "VALUES " +
+                               "(@Id,@UserId,@CameraId,@OauthToken,@Code,@Title,@Status,@Privacy,@FromDT,@ToDT,@DateAlways,@TimeAlways,@ServerIP,@TzId,@TimeZone,@SnapsInterval,@ModifiedDT,@EnableMD,@MDThreshold,@ExcludeDark,@DarkThreshold, @FPS,@IsRecording,@IsDeleted,@CreatedDT,@WatermarkImage,@WatermarkPosition) " +
+                               "SELECT CAST(scope_identity() AS int) SET IDENTITY_INSERT Timelapses OFF";
+                try
+                {
+                    var p0 = new SqlParameter("@Id", t.ID);
+                    var p1 = new SqlParameter("@CameraId", t.CameraId);
+                    var p2 = new SqlParameter("@UserId", t.UserId);
+                    var p3 = new SqlParameter("@Code", t.Code);
+                    var p4 = new SqlParameter("@Title", t.Title);
+                    var p5 = new SqlParameter("@Status", t.Status);
+                    var p6 = new SqlParameter("@Privacy", t.Privacy);
+                    var p7 = new SqlParameter("@FromDT", (t.FromDT == null ? Utils.SQLMinDate : t.FromDT));
+                    var p8 = new SqlParameter("@ToDT", (t.ToDT == null ? Utils.SQLMaxDate : t.ToDT));
+                    var p9 = new SqlParameter("@ServerIP", t.ServerIP);
+                    var p10 = new SqlParameter("@EnableMD", t.EnableMD);
+                    var p11 = new SqlParameter("@MDThreshold", t.MDThreshold);
+                    var p12 = new SqlParameter("@ExcludeDark", t.ExcludeDark);
+                    var p13 = new SqlParameter("@DarkThreshold", t.DarkThreshold);
+                    var p14 = new SqlParameter("@IsRecording", t.IsRecording);
+                    var p15 = new SqlParameter("@IsDeleted", t.IsDeleted);
+                    var p16 = new SqlParameter("@ModifiedDT", Utils.ConvertFromUtc(DateTime.UtcNow, t.TimeZone));
+                    var p17 = new SqlParameter("@SnapsInterval", t.SnapsInterval);
+                    var p18 = new SqlParameter("@TimeZone", t.TimeZone);
+                    var p19 = new SqlParameter("@DateAlways", t.DateAlways);
+                    var p20 = new SqlParameter("@TimeAlways", t.TimeAlways);
+                    var p21 = new SqlParameter("@CreatedDT", Utils.ConvertFromUtc(DateTime.UtcNow, t.TimeZone));
+                    var p22 = new SqlParameter("@TzId", t.TzId);
+                    var p23 = new SqlParameter("@FPS", t.FPS);
+                    var p24 = new SqlParameter("@OauthToken", t.OauthToken);
+                    var p25 = new SqlParameter("@WatermarkImage", (string.IsNullOrEmpty(t.WatermarkImage) || t.WatermarkImage.Equals("-") ? "" : t.WatermarkImage));
+                    var p26 = new SqlParameter("@WatermarkPosition", t.WatermarkPosition);
+
+                    var list = new[] { p0, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, p20, p21, p22, p23, p24, p25, p26 };
+                    var cmd = new SqlCommand { CommandText = query, CommandType = CommandType.Text };
+                    cmd.Parameters.AddRange(list);
+                    
+                    cmd.Connection = AzureConnection;
+                    int result = (int)cmd.ExecuteScalar();
+                    
+                    cmd.Dispose();
+                }
+                catch (Exception ex)
+                {
+
+                }
+            }
+            AzureConnection.Close();
+        }
+
+        public static void UpdateTimelapsesOnAzure()
+        {
+            SqlConnection AzureConnection = new SqlConnection(ConfigurationSettings.AppSettings["ConnectionStringAzure"]);
+            AzureConnection.Open();
+            List<Timelapse> timelapses = TimelapseDao.GetList(null, null);
+            foreach (Timelapse t in timelapses)
+            {
+                string query = @"UPDATE [dbo].[Timelapses] " +
+                    "SET [SnapsCount] = @SnapsCount, [FileSize] = @FileSize, [Resolution] = @Resolution, [Duration] = @Duration, [LastSnapDT] = @LastSnapDT " +
+                    "WHERE (Id = '" + t.ID + "')";
+                try
+                {
+                    var p27 = new SqlParameter("@SnapsCount", t.SnapsCount);
+                    var p28 = new SqlParameter("@Duration", t.Duration);
+                    var p29 = new SqlParameter("@Resolution", t.Resolution);
+                    var p30 = new SqlParameter("@FileSize", t.FileSize);
+                    var p31 = new SqlParameter("@LastSnapDT", t.LastSnapDT);
+
+                    var list = new[] { p27, p28, p29, p30, p31 };
+                    var cmd = new SqlCommand { CommandText = query, CommandType = CommandType.Text };
+                    cmd.Parameters.AddRange(list);
+
+                    cmd.Connection = AzureConnection;
+                    int result = cmd.ExecuteNonQuery();
+
+                    cmd.Dispose();
+                }
+                catch (Exception ex)
+                {
+
+                }
+            }
+            AzureConnection.Close();
+        }
+
+        /// <summary>
+        /// Checks if given timelapse needs to be started
+        /// </summary>
+        /// <param name="timelapse"></param>
+        /// <returns></returns>
+        public static bool StartTimelapse(Timelapse timelapse)
+        {
+            if (timelapse.Status == (int)TimelapseStatus.Failed)
+            { 
+                timelapse.StatusTag = "Camera not accessible";
+                FileLog("Utils.StartTimelapse#" + timelapse.ID + " - Start Failed");
+                return true;
+            }
+
+            if (timelapse.Status == (int)TimelapseStatus.Stopped && timelapse.IsRecording)
+            { 
+                timelapse.Status = (int)TimelapseStatus.Processing; timelapse.StatusTag = "Now recording...";
+                FileLog("Utils.StartTimelapse#" + timelapse.ID + " - Start Stopped");
+                return true;
+            }
+
+            // otherwise if new, processing, scheduled or expired
+            if (timelapse.DateAlways && timelapse.TimeAlways)
+            {
+                timelapse.Status = (int)TimelapseStatus.Processing; timelapse.StatusTag = "Now recording...";
+                FileLog("Utils.StartTimelapse#" + timelapse.ID + " - Start Recording Always");
+                return true;
+            } 
+            else if (timelapse.DateAlways && !timelapse.TimeAlways)
+            {
+                if (timelapse.FromDT.Hour >= timelapse.ToDT.Hour)
+                {
+                    DateTime nextDay = DateTime.UtcNow.AddDays(1);
+                    if (DateTime.UtcNow >= new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, DateTime.UtcNow.Day, timelapse.FromDT.Hour, timelapse.FromDT.Minute, 0) &&
+                        DateTime.UtcNow < new DateTime(nextDay.Year, nextDay.Month, nextDay.Day, timelapse.ToDT.Hour, timelapse.ToDT.Minute, 59))
+                    { 
+                        timelapse.Status = (int)TimelapseStatus.Scheduled; timelapse.StatusTag = "Recording on schedule...";
+                        FileLog("Utils.StartTimelapse#" + timelapse.ID + " - Start Recording Everyday Next");
+                        return true; 
+                    }
+                }
+                else if (DateTime.UtcNow >= new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, DateTime.UtcNow.Day, timelapse.FromDT.Hour, timelapse.FromDT.Minute, 0) &&
+                    DateTime.UtcNow < new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, DateTime.UtcNow.Day, timelapse.ToDT.Hour, timelapse.ToDT.Minute, 59))
+                {
+                    timelapse.Status = (int)TimelapseStatus.Scheduled; timelapse.StatusTag = "Recording on schedule...";
+                    FileLog("Utils.StartTimelapse#" + timelapse.ID + " - Start Recording Everyday");
+                    return true; 
+                }
+            }
+            else if (!timelapse.DateAlways && timelapse.TimeAlways)
+            {
+                if (DateTime.UtcNow >= new DateTime(timelapse.FromDT.Year, timelapse.FromDT.Month, timelapse.FromDT.Day, 0, 0, 0) &&
+                    DateTime.UtcNow < new DateTime(timelapse.ToDT.Year, timelapse.ToDT.Month, timelapse.ToDT.Day, 23, 59, 59))
+                { 
+                    timelapse.Status = (int)TimelapseStatus.Scheduled; timelapse.StatusTag = "Recording on schedule...";
+                    FileLog("Utils.StartTimelapse#" + timelapse.ID + " - Start Recording Anytime");
+                    return true; 
+                }
+            }
+            else if (!timelapse.DateAlways && !timelapse.TimeAlways)
+            {
+                if (DateTime.UtcNow >= new DateTime(timelapse.FromDT.Year, timelapse.FromDT.Month, timelapse.FromDT.Day, timelapse.FromDT.Hour, timelapse.FromDT.Minute, 0) &&
+                    DateTime.UtcNow < new DateTime(timelapse.ToDT.Year, timelapse.ToDT.Month, timelapse.ToDT.Day, timelapse.ToDT.Hour, timelapse.ToDT.Minute, 59))
+                { 
+                    timelapse.Status = (int)TimelapseStatus.Scheduled; timelapse.StatusTag = "Recording on schedule...";
+                    FileLog("Utils.StartTimelapse#" + timelapse.ID + " - Start Recording Range");
+                    return true; 
+                }
+            }
+
+            FileLog("Utils.StartTimelapse#" + timelapse.ID + " - NoStart Recording");
+            return false;
+        }
+
+        /// <summary>
+        /// Checks if given timelapse needs to be stopped
+        /// </summary>
+        /// <param name="timelapse"></param>
+        /// <returns></returns>
+        public static bool StopTimelapse(Timelapse timelapse)
+        {
+            if (timelapse.Status == (int)TimelapseStatus.NotFound)
+            { 
+                timelapse.StatusTag = "Camera details not found";
+                FileLog("Utils.StopTimelapse#" + timelapse.ID + " - Stop Recording Not Found");
+                return true; 
+            }
+
+            //if (timelapse.Status == (int)TimelapseStatus.Failed)
+            //{ 
+            //    timelapse.StatusTag = "Camera not accessible";
+            //    FileLog("Utils.StopTimelapse#" + timelapse.ID + " - Stop Recording Failed");
+            //    return true; 
+            //}
+
+            if (timelapse.Status == (int)TimelapseStatus.Stopped)
+            { 
+                timelapse.StatusTag = "Recording stopped";
+                FileLog("Utils.StopTimelapse#" + timelapse.ID + " - Stop Recording Stopped");
+                return true; 
+            }
+
+            //if (timelapse.Status == (int)TimelapseStatus.Expired)
+            //{ 
+            //    timelapse.StatusTag = "Out of schedule";
+            //    FileLog("Utils.StopTimelapse#" + timelapse.ID + " - Stop Recording Expired");
+            //    return true; 
+            //}
+
+            // otherwise if new, processing or scheduled
+            if (timelapse.DateAlways && !timelapse.TimeAlways)
+            {
+                if (timelapse.FromDT.Hour >= timelapse.ToDT.Hour)
+                {
+                    DateTime nextDay = DateTime.UtcNow.AddDays(1);
+                    if (DateTime.UtcNow >= new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, DateTime.UtcNow.Day, timelapse.ToDT.Hour, timelapse.ToDT.Minute, 59) &&
+                        DateTime.UtcNow < new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, DateTime.UtcNow.Day, timelapse.FromDT.Hour, timelapse.FromDT.Minute, 00))
+                    { 
+                        timelapse.Status = (int)TimelapseStatus.Scheduled; timelapse.StatusTag = "Recording on schedule";
+                        FileLog("Utils.StopTimelapse#" + timelapse.ID + " - NoStop Recording Everyday Next");
+                        return false; 
+                    }
+                }
+                else if (DateTime.UtcNow < new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, DateTime.UtcNow.Day, timelapse.FromDT.Hour, timelapse.FromDT.Minute, 0) ||
+                    DateTime.UtcNow > new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, DateTime.UtcNow.Day, timelapse.ToDT.Hour, timelapse.ToDT.Minute, 59))
+                { 
+                    timelapse.Status = (int)TimelapseStatus.Scheduled; timelapse.StatusTag = "Recording on schedule";
+                    FileLog("Utils.StopTimelapse#" + timelapse.ID + " - NoStop Recording Everyday");
+                    return false; 
+                }
+            }
+            else if (!timelapse.DateAlways && timelapse.TimeAlways)
+            {
+                if (DateTime.UtcNow < new DateTime(timelapse.FromDT.Year, timelapse.FromDT.Month, timelapse.FromDT.Day, 0, 0, 0) ||
+                    DateTime.UtcNow >= new DateTime(timelapse.ToDT.Year, timelapse.ToDT.Month, timelapse.ToDT.Day, 23, 59, 59))
+                { 
+                    timelapse.Status = (int)TimelapseStatus.Expired; timelapse.StatusTag = "Out of schedule";
+                    FileLog("Utils.StopTimelapse#" + timelapse.ID + " - Stop Recording Anytime - Expired");
+                    return true; 
+                }
+            }
+            else if (!timelapse.DateAlways && !timelapse.TimeAlways)
+            {
+                if (DateTime.UtcNow.Date >= timelapse.FromDT.Date && DateTime.UtcNow.Date <= timelapse.ToDT.Date)
+                { 
+                    timelapse.Status = (int)TimelapseStatus.Scheduled; timelapse.StatusTag = "Recording on schedule";
+                    FileLog("Utils.StopTimelapse#" + timelapse.ID + " - NoStop Recording Range");
+                    return false; 
+                }
+                else
+                { 
+                    timelapse.Status = (int)TimelapseStatus.Expired; timelapse.StatusTag = "Out of schedule";
+                    FileLog("Utils.StopTimelapse#" + timelapse.ID + " - Stop Recording Range - Expired");
+                    return true; 
+                }
+            }
+
+            FileLog("Utils.StopTimelapse#" + timelapse.ID + " - NoStop Recording");
+            return false;
+        }
 
         public static byte[] WatermarkImage(string input, string output, string logofile, int logoposition)
         {
@@ -36,7 +293,7 @@ namespace BLL.Common
                 MemoryStream stream = new MemoryStream();
 
                 if (!string.IsNullOrEmpty(logofile))
-                    AddLogo(g, logofile, logoposition, image.Width, image.Height);
+                    InsertLogo(g, logofile, logoposition, image.Width, image.Height);
 
                 using (MemoryStream ms = new MemoryStream())
                 {
@@ -52,7 +309,6 @@ namespace BLL.Common
                 if (!string.IsNullOrEmpty(output))
                 {
                     Storage.SaveFile(output, bytes);
-                    FileLog("Utils.WatermarkImage: File Saved: " + output);
                 }
                 return bytes;
             }
@@ -63,7 +319,7 @@ namespace BLL.Common
             }
         }
 
-        public static byte[] WatermarkImage(byte[] imagedata, string output, string logofile, int logoposition)
+        public static byte[] WatermarkImage(int timelapseId, byte[] imagedata, string output, string logofile, int logoposition)
         {
             byte[] bytes = new byte[] { };
             try
@@ -73,7 +329,7 @@ namespace BLL.Common
                 Graphics g = System.Drawing.Graphics.FromImage(image);
 
                 if (!string.IsNullOrEmpty(logofile))
-                    AddLogo(g, logofile, logoposition, image.Width, image.Height);
+                    InsertLogo(timelapseId, g, logofile, logoposition, image.Width, image.Height);
 
                 using (MemoryStream ms = new MemoryStream())
                 {
@@ -100,29 +356,16 @@ namespace BLL.Common
             }
         }
 
-        private static void AddLogo(Graphics g, string watermark, int position, int width, int height)
+        private static void InsertLogo(Graphics g, string watermark, int position, int width, int height)
         {
             try
             {
-                //// ideally should not download it, instead get from disk location
-                //// but that was erroring 'out of memory' due to corrupt image format
-                string nPath = Path.Combine(Settings.TempLogos, Path.GetFileName(watermark));
-                Storage.DownloadFile(watermark, nPath);
-
-                string path = WebUtility.UrlDecode(watermark);
-                path = path.Replace(Utils.SiteServer, Utils.WatermarkPrefix).Replace(@"/", @"\\");
-                if (!File.Exists(path))
-                {
-                    FileLog("Utils.AddLogo: File Not Found: " + nPath);
-                    return;
-                }
-                
-                using (Image logo = Image.FromFile(nPath))
+                using (Image logo = Image.FromFile(watermark))
                 {
                     Bitmap TransparentLogo = new Bitmap(logo.Width, logo.Height);
                     Graphics TGraphics = Graphics.FromImage(TransparentLogo);
                     ColorMatrix ColorMatrix = new ColorMatrix();
-                    ColorMatrix.Matrix33 = 0.50F;           // transparency
+                    ColorMatrix.Matrix33 = 0.50F;
                     ImageAttributes ImgAttributes = new ImageAttributes();
                     ImgAttributes.SetColorMatrix(ColorMatrix, ColorMatrixFlag.Default, ColorAdjustType.Bitmap);
                     TGraphics.DrawImage(logo, new Rectangle(0, 0, TransparentLogo.Width, TransparentLogo.Height), 0, 0, TransparentLogo.Width, TransparentLogo.Height, GraphicsUnit.Pixel, ImgAttributes);
@@ -143,7 +386,58 @@ namespace BLL.Common
                             g.DrawImage(TransparentLogo, width - (TransparentLogo.Width + Utils.WatermarkMargin), height - (TransparentLogo.Height + Utils.WatermarkMargin));
                             break;
                     }
-                    FileLog("Logo added: " + nPath);
+                }
+            }
+            catch (Exception x) { FileLog("Utils.AddLogo: " + x.Message + Environment.NewLine + x.ToString()); }
+        }
+
+        private static void InsertLogo(int timelapseId, Graphics g, string watermark, int position, int width, int height)
+        {
+            try
+            {
+                string file = "";
+                if (!string.IsNullOrEmpty(watermark))
+                    file = Utils.DoDownload(watermark, timelapseId + ".png");   // creates .png file on root of bll.dll
+
+                ////// ideally should not download it, instead get from disk location
+                ////// but that was erroring 'out of memory' due to corrupt image format
+                //string nPath = Path.Combine(Settings.TempLogos, Path.GetFileName(watermark));
+                //Storage.DownloadFile(watermark, nPath);
+                //string path = WebUtility.UrlDecode(watermark);
+                //path = path.Replace(Utils.SiteServer, Utils.WatermarkPrefix).Replace(@"/", @"\\");
+                //if (!File.Exists(path))
+                //{
+                //    FileLog("Utils.AddLogo: File Not Found: " + nPath);
+                //    return;
+                //}
+
+                using (Image logo = Image.FromFile(file))
+                {
+                    Bitmap TransparentLogo = new Bitmap(logo.Width, logo.Height);
+                    Graphics TGraphics = Graphics.FromImage(TransparentLogo);
+                    ColorMatrix ColorMatrix = new ColorMatrix();
+                    ColorMatrix.Matrix33 = 0.50F;
+                    ImageAttributes ImgAttributes = new ImageAttributes();
+                    ImgAttributes.SetColorMatrix(ColorMatrix, ColorMatrixFlag.Default, ColorAdjustType.Bitmap);
+                    TGraphics.DrawImage(logo, new Rectangle(0, 0, TransparentLogo.Width, TransparentLogo.Height), 0, 0, TransparentLogo.Width, TransparentLogo.Height, GraphicsUnit.Pixel, ImgAttributes);
+                    TGraphics.Dispose();
+
+                    switch (position)
+                    {
+                        case (int)WatermarkPosition.TopLeft:
+                            g.DrawImage(TransparentLogo, Utils.WatermarkMargin, Utils.WatermarkMargin);
+                            break;
+                        case (int)WatermarkPosition.TopRight:
+                            g.DrawImage(TransparentLogo, width - (TransparentLogo.Width + Utils.WatermarkMargin), Utils.WatermarkMargin);
+                            break;
+                        case (int)WatermarkPosition.BottomLeft:
+                            g.DrawImage(TransparentLogo, Utils.WatermarkMargin, height - (TransparentLogo.Height + Utils.WatermarkMargin));
+                            break;
+                        case (int)WatermarkPosition.BottomRight:
+                            g.DrawImage(TransparentLogo, width - (TransparentLogo.Width + Utils.WatermarkMargin), height - (TransparentLogo.Height + Utils.WatermarkMargin));
+                            break;
+                    }
+                    FileLog("Logo added: " + file);
                 }
             }
             catch (Exception x) { FileLog("Utils.AddLogo: " + x.Message + Environment.NewLine + x.ToString()); }
@@ -401,6 +695,27 @@ namespace BLL.Common
             TimelapseLog(timelapse, message + Environment.NewLine + x.ToString());
         }
 
+        public static string DoDownload(string url, string path)
+        {
+            try
+            {
+                byte[] data;
+                using (WebClient client = new WebClient())
+                {
+                    data = client.DownloadData(url);
+                    using (MemoryStream mem = new MemoryStream(data)) 
+                    {
+                        var yourImage = Image.FromStream(mem);
+                        yourImage.Save(path, ImageFormat.Png);
+                    }
+                }
+                return path;
+            }
+            catch {
+                return "";
+            }
+        }
+
         public static SnapshotData DoDownload(string url, string username, string password, bool useCredentials)
         {
             SnapshotData snapshot = new SnapshotData();
@@ -429,19 +744,40 @@ namespace BLL.Common
             return snapshot;
         }
 
-        public static string ProcessRunning(int processId)
+        public static int TimelapseRunning(int timelapseId)
         {
+            int id = 0;
             try
             {
                 Process[] processlist = Process.GetProcesses();
                 foreach (Process process in processlist)
-                    if (process.Id == processId)
-                        return process.ProcessName;
-                return "";
+                {
+                    if (process.ProcessName.ToLower().StartsWith("timelapser_"))
+                    {
+                        int tid = 0;
+                        string _id = process.ProcessName.Substring(
+                            process.ProcessName.IndexOf("_") + 1,
+                            process.ProcessName.Length - (process.ProcessName.IndexOf("_") + 1));
+                        if (int.TryParse(_id, out tid) && tid == timelapseId)
+                        {
+                            if (process.Responding)
+                            {
+                                id = process.Id;
+                                break;
+                            }
+                            else
+                            {
+                                id = process.Id * -1;
+                                break;
+                            }
+                        }
+                    }
+                }
+                return id;
             }
             catch (Exception x)
             {
-                return "";
+                return id;
             }
         }
 
@@ -458,6 +794,64 @@ namespace BLL.Common
             catch (Exception x)
             {
                 return 0;
+            }
+        }
+
+        public static bool KillProcess(int pid, int tid)
+        {
+            if (pid == 0) return false;
+            try
+            {
+                ProcessStartInfo start = new ProcessStartInfo();
+                start.FileName = "taskkill.exe";
+                start.Arguments = "/pid " + pid + " /F";
+                start.UseShellExecute = false;
+
+                Process process = new Process();
+                start.CreateNoWindow = true;
+                process.StartInfo = start;
+                process.Start();
+
+                //// remove this timelapse from dictionary untill its been added in next run
+                //// so that the dictioanary always contains list of timelapses with currently running processes
+                if (tid > 0)
+                {
+                    Utils.KillProcess("ffmpeg_" + tid);
+                }
+
+                return true;
+            }
+            catch (Exception x)
+            {
+                Utils.FileLog("KillProcess Error: " + x.Message);
+                return false;
+            }
+        }
+
+        public static void KillProcess(string processName)
+        {
+            try
+            {
+                Process[] processlist = Process.GetProcesses();
+                foreach (Process process in processlist)
+                {
+                    if (process.ProcessName.ToLower().Equals(processName))
+                    {
+                        ProcessStartInfo start = new ProcessStartInfo();
+                        start.FileName = "taskkill.exe";
+                        start.Arguments = "/pid " + process.Id + " /F";
+                        start.UseShellExecute = false;
+
+                        Process p = new Process();
+                        start.CreateNoWindow = true;
+                        p.StartInfo = start;
+                        p.Start();
+                    }
+                }
+            }
+            catch (Exception x)
+            {
+                Utils.FileLog("KillFfmpeg Error: " + x.Message);
             }
         }
     }

@@ -26,6 +26,11 @@ namespace BLL.Common
             get { return ConfigurationSettings.AppSettings["EvercamClientUri"]; }
         }
 
+        public static bool EvercamSandboxMode
+        {
+            get { return bool.Parse(ConfigurationSettings.AppSettings["EvercamSandboxMode"]); }
+        }
+
         public static string TimelapseAPIUrl
         {
             get { return ConfigurationSettings.AppSettings["TimelapseAPIUrl"]; }
@@ -84,6 +89,21 @@ namespace BLL.Common
         public static string TempLogos
         {
             get { return ConfigurationSettings.AppSettings["TempLogos"]; }
+        }
+
+        public static string DeletionExePath
+        {
+            get { return ConfigurationSettings.AppSettings["DeletionExePath"]; }
+        }
+
+        public static int DeletionCheckHours
+        {
+            get { return int.Parse(ConfigurationSettings.AppSettings["DeletionCheckHours"]); }
+        }
+
+        public static string DeleteWithIds
+        {
+            get { return ConfigurationSettings.AppSettings["DeleteWithIds"]; }
         }
 
         public static string FfprobeExePath
@@ -164,6 +184,16 @@ namespace BLL.Common
         public static string ExceptionFromEmail
         {
             get { return ConfigurationSettings.AppSettings["ExceptionFromEmail"]; }
+        }
+
+        public static string WatermarkPrefix
+        {
+            get { return ConfigurationSettings.AppSettings["WatermarkPrefix"]; }
+        }
+
+        public static int WatermarkMargin
+        {
+            get { return int.Parse(ConfigurationSettings.AppSettings["WatermarkMargin"]); }
         }
 
         public static int TimeoutLimit

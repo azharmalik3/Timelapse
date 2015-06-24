@@ -15,7 +15,7 @@ using System.Web.Security;
 using System.Web.Http.Cors;
 using System.Net.Http.Headers;
 using Newtonsoft.Json;
-using EvercamV1;
+using EvercamV2;
 using TimelapseApi.Models;
 using BLL.Dao;
 using BLL.Entities;
@@ -116,39 +116,34 @@ namespace TimelapseApi.Controllers
         [HttpGet]
         public DataModel GetPlaceholder(string code)
         {
+            Evercam.SANDBOX = Settings.EvercamSandboxMode;
             Evercam evercam = new Evercam(Settings.EvercamClientID, Settings.EvercamClientSecret, Settings.EvercamClientUri);
             Timelapse t = TimelapseDao.Get(code);
+            if (!string.IsNullOrEmpty(t.OauthToken))
+                evercam = new Evercam(t.OauthToken);
+
             Camera c = evercam.GetCamera(t.CameraId);
+            
             string cleanCameraId = BLL.Common.Utils.RemoveSymbols(c.ID);
             string filePath = Path.Combine(Settings.BucketUrl, Settings.BucketName, cleanCameraId, t.ID.ToString());
             if (!Directory.Exists(filePath))
                 Directory.CreateDirectory(filePath);
-            if (c.IsPublic)
+
+            try
             {
-                string image = evercam.GetProxyImage(c.ID);
+                byte[] image = evercam.CreateSnapshot(c.ID, Settings.EvercamClientName, true).ToBytes();
                 return new DataModel
                 {
                     data = "data:image/jpeg;base64," + Convert.ToBase64String(
                         Utils.WatermarkImage(
-                        Convert.FromBase64String(image.Replace("data:image/jpeg;base64,", "")),
-                        filePath + "\\" + t.Code + ".jpg",
-                        t.WatermarkImage,
-                        t.WatermarkPosition))
+                            t.ID,
+                            image,
+                            filePath + "\\" + t.Code + ".jpg",
+                            t.WatermarkImage,
+                            t.WatermarkPosition))
                 };
             }
-            else
-            {
-                string image = evercam.GetLiveImage(c.ID).Data;
-                return new DataModel 
-                {
-                    data = "data:image/jpeg;base64," + Convert.ToBase64String(   
-                        Utils.WatermarkImage(
-                        Convert.FromBase64String(image.Replace("data:image/jpeg;base64,", "")),
-                        filePath + "\\" + t.Code + ".jpg",
-                        t.WatermarkImage,
-                        t.WatermarkPosition))
-                };
-            }
+            catch (Exception x) { return new DataModel(); }
         }
 
         /// <summary>
@@ -170,41 +165,33 @@ namespace TimelapseApi.Controllers
             if ((tid = TimelapseDao.Insert(t)) == 0)
                 throw new HttpResponseException(HttpStatusCode.BadRequest);
 
-            string base64 = "data:image/jpeg;base64,";
-            string upPath = Settings.TimelapseAPIUrl + "testimage/" + Settings.TempTimelapse;
+            string base64 = Settings.TimelapseAPIUrl + "testimage/" + Settings.TempTimelapse;
             if (!string.IsNullOrEmpty(data.watermark_file))
             {
                 //// create placeholder image at the same time
+                Evercam.SANDBOX = Settings.EvercamSandboxMode;
                 Evercam evercam = new Evercam(Settings.EvercamClientID, Settings.EvercamClientSecret, Settings.EvercamClientUri);
+                if (!string.IsNullOrEmpty(t.OauthToken))
+                    evercam = new Evercam(t.OauthToken);
+
                 Camera c = evercam.GetCamera(t.CameraId);
                 string cleanCameraId = BLL.Common.Utils.RemoveSymbols(c.ID);
                 string filePath = Path.Combine(Settings.BucketUrl, Settings.BucketName, cleanCameraId, tid.ToString());
                 if (!Directory.Exists(filePath))
                     Directory.CreateDirectory(filePath);
 
-                
-                if (c.IsPublic)
+                try
                 {
-                    string image = evercam.GetProxyImage(c.ID);
-                    base64 += Convert.ToBase64String(
-                            Utils.WatermarkImage(
-                            Convert.FromBase64String(image.Replace("data:image/jpeg;base64,", "")),
+                    byte[] image = evercam.CreateSnapshot(c.ID, Settings.EvercamClientName, true).ToBytes();
+                    base64 = "data:image/jpeg;base64," + Convert.ToBase64String(
+                        Utils.WatermarkImage(
+                            t.ID,
+                            image,
                             filePath + "\\" + t.Code + ".jpg",
                             t.WatermarkImage,
                             t.WatermarkPosition));
-                    upPath = Settings.SiteServer + Settings.BucketName + "/" + cleanCameraId + "/" + tid.ToString() + "/" + t.Code + ".jpg";
                 }
-                else
-                {
-                    string image = evercam.GetLiveImage(c.ID).Data;
-                    base64 += Convert.ToBase64String(
-                            Utils.WatermarkImage(
-                            Convert.FromBase64String(image.Replace("data:image/jpeg;base64,", "")),
-                            filePath + "\\" + t.Code + ".jpg",
-                            t.WatermarkImage,
-                            t.WatermarkPosition));
-                    upPath = Settings.SiteServer + Settings.BucketName + "/" + cleanCameraId + "/" + tid.ToString() + "/" + t.Code + ".jpg";
-                }
+                catch (Exception x) { BLL.Common.Utils.FileLog(t.ID + " - " + x.ToString()); }
             }
 
             return TimelapseModel.Convert(TimelapseDao.Get(tid), base64);
@@ -251,13 +238,13 @@ namespace TimelapseApi.Controllers
                 }
 
                 if (!t.DateAlways && t.ToDT.Date <= t.FromDT.Date)
-                    TimelapseDao.UpdateStatus(t.Code, TimelapseStatus.Expired, "Out of schedule", t.TimeZone);
+                    TimelapseDao.UpdateStatus(t.Code, TimelapseStatus.Stopped, "Out of schedule", t.TimeZone);
                 else if ((DateTime.UtcNow < from || DateTime.UtcNow > to))
                 {
                     if (t.DateAlways)
                         TimelapseDao.UpdateStatus(t.Code, TimelapseStatus.Scheduled, "Recording on schedule", t.TimeZone);
                     else
-                        TimelapseDao.UpdateStatus(t.Code, TimelapseStatus.Expired, "Out of schedule", t.TimeZone);
+                        TimelapseDao.UpdateStatus(t.Code, TimelapseStatus.Stopped, "Out of schedule", t.TimeZone);
                 }
             }
             else if (t.Status > (int)TimelapseStatus.Processing) {
@@ -272,47 +259,33 @@ namespace TimelapseApi.Controllers
                     TimelapseDao.UpdateStatus(t.Code, TimelapseStatus.Processing, "Processing...", t.TimeZone);
             }
 
-            string base64 = "data:image/jpeg;base64,";
+            string base64 = Settings.TimelapseAPIUrl + "testimage/" + Settings.TempTimelapse;
             if (!string.IsNullOrEmpty(data.watermark_file))
             {
                 //// create placeholder image at the same time
+                Evercam.SANDBOX = Settings.EvercamSandboxMode;
                 Evercam evercam = new Evercam(Settings.EvercamClientID, Settings.EvercamClientSecret, Settings.EvercamClientUri);
+                if (!string.IsNullOrEmpty(t.OauthToken))
+                    evercam = new Evercam(t.OauthToken);
+
                 Camera c = evercam.GetCamera(t.CameraId);
                 string cleanCameraId = BLL.Common.Utils.RemoveSymbols(c.ID);
                 string filePath = Path.Combine(Settings.BucketUrl, Settings.BucketName, cleanCameraId, t.ID.ToString());
                 if (!Directory.Exists(filePath))
                     Directory.CreateDirectory(filePath);
-                
-                if (c.IsPublic)
+
+                try
                 {
-                    string image = evercam.GetProxyImage(c.ID);
-                    //Utils.WatermarkImage(
-                    //        Convert.FromBase64String(image.Replace("data:image/jpeg;base64,", "")),
-                    //        filePath + "\\" + t.Code + ".jpg",
-                    //        t.WatermarkImage,
-                    //        t.WatermarkPosition);
-                    base64 += Convert.ToBase64String(
+                    byte[] image = evercam.CreateSnapshot(c.ID, Settings.EvercamClientName, true).ToBytes();
+                    base64 = "data:image/jpeg;base64," + Convert.ToBase64String(
                             Utils.WatermarkImage(
-                            Convert.FromBase64String(image.Replace("data:image/jpeg;base64,", "")),
-                            filePath + "\\" + t.Code + ".jpg",
-                            t.WatermarkImage,
-                            t.WatermarkPosition));
+                                t.ID,
+                                image,
+                                filePath + "\\" + t.Code + ".jpg",
+                                t.WatermarkImage,
+                                t.WatermarkPosition));
                 }
-                else
-                {
-                    string image = evercam.GetLiveImage(c.ID).Data;
-                    //Utils.WatermarkImage(
-                    //        Convert.FromBase64String(image.Replace("data:image/jpeg;base64,", "")),
-                    //        filePath + "\\" + t.Code + ".jpg",
-                    //        t.WatermarkImage,
-                    //        t.WatermarkPosition);
-                    base64 += Convert.ToBase64String(
-                            Utils.WatermarkImage(
-                            Convert.FromBase64String(image.Replace("data:image/jpeg;base64,", "")),
-                            filePath + "\\" + t.Code + ".jpg",
-                            t.WatermarkImage,
-                            t.WatermarkPosition));
-                }
+                catch (Exception x) { BLL.Common.Utils.FileLog(t.ID + " - " + x.ToString()); }
             }
 
             return TimelapseModel.Convert(TimelapseDao.Get(code), base64);
@@ -410,7 +383,12 @@ namespace TimelapseApi.Controllers
                     result = new StreamReader(response.GetResponseStream()).ReadToEnd();
                     response.Close();
                 }
-                return JsonConvert.DeserializeObject<TokenUserModel>(result);
+                TokenUserModel token = JsonConvert.DeserializeObject<TokenUserModel>(result);
+
+                ////// UPDATES USER ACCESS TOKEN AGAINST ALL SNAPMAILS ////////
+                TimelapseDao.UpdateUserToken(token.userid, token.access_token);
+                ///////////////////////////////////////////////////////////////
+                return token;
             }
             catch (Exception x) { throw new HttpResponseException(HttpStatusCode.InternalServerError); }
         }
